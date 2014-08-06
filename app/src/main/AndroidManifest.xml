@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fi.atteheino.mediashuffler.app" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="fi.atteheino.mediashuffler.app.BrowserActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="fi.atteheino.mediashuffler.app.MainActivity"
+            android:label="@string/title_activity_main" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- service android:name="org.teleal.cling.android.AndroidUpnpServiceImpl"/ -->
+        <service android:name="fi.atteheino.mediashuffler.app.BrowserUpnpService" />
+
+        <activity
+            android:name="fi.atteheino.mediashuffler.app.SourceFolderSelectActivity"
+            android:label="@string/title_activity_source_folder_select"
+            android:parentActivityName="fi.atteheino.mediashuffler.app.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
+        <service android:name="org.teleal.cling.android.AndroidUpnpServiceImpl"/>
+    </application>
+
+</manifest>
