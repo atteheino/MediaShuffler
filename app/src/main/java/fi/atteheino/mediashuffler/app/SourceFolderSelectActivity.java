@@ -35,12 +35,49 @@ public class SourceFolderSelectActivity extends Activity {
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             upnpService = (AndroidUpnpService) service;
+            // Add a listener for device registration events
+            upnpService.getRegistry().addListener(
+                    createRegistryListener(upnpService)
+            );
+
+            // Broadcast a search message for all devices
+            upnpService.getControlPoint().search(
+                    new STAllHeader()
+            );
         }
         public void onServiceDisconnected(ComponentName className) {
             upnpService = null;
         }
     };
 
+ private RegistryListener createRegistryListener(final UpnpService upnpService) {
+    return new DefaultRegistryListener() {
+
+        ServiceId serviceId = new UDAServiceId("optionsseista haetaan");
+
+        @Override
+        public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+
+            Service switchPower;
+            if ((switchPower = device.findService(serviceId)) != null) {
+
+                System.out.println("Service discovered: " + switchPower);
+                executeAction(upnpService, switchPower);
+
+            }
+
+        }
+
+        @Override
+        public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+            Service switchPower;
+            if ((switchPower = device.findService(serviceId)) != null) {
+                System.out.println("Service disappeared: " + switchPower);
+            }
+        }
+
+    };
+}
 
 
     @Override
