@@ -11,18 +11,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.teleal.cling.android.AndroidUpnpService;
-import org.teleal.cling.android.AndroidUpnpServiceImpl;
-import org.teleal.cling.model.action.ActionInvocation;
-import org.teleal.cling.model.message.UpnpResponse;
+import org.teleal.cling.model.message.header.STAllHeader;
+import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.Service;
-import org.teleal.cling.support.contentdirectory.callback.Browse;
-import org.teleal.cling.support.model.BrowseFlag;
-import org.teleal.cling.support.model.DIDLContent;
-import org.teleal.cling.support.model.DIDLObject;
-import org.teleal.cling.support.model.item.Item;
-import org.teleal.cling.support.model.item.MusicTrack;
-
-import static junit.framework.Assert.assertEquals;
+import org.teleal.cling.model.types.ServiceId;
+import org.teleal.cling.model.types.UDAServiceId;
+import org.teleal.cling.registry.DefaultRegistryListener;
+import org.teleal.cling.registry.Registry;
+import org.teleal.cling.registry.RegistryListener;
 
 
 public class SourceFolderSelectActivity extends Activity {
@@ -50,10 +46,10 @@ public class SourceFolderSelectActivity extends Activity {
         }
     };
 
- private RegistryListener createRegistryListener(final UpnpService upnpService) {
+    private RegistryListener createRegistryListener(final AndroidUpnpService upnpService) {
     return new DefaultRegistryListener() {
 
-        ServiceId serviceId = new UDAServiceId("optionsseista haetaan");
+        ServiceId serviceId = new UDAServiceId(options.getDLNADeviceUDN());
 
         @Override
         public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
@@ -62,8 +58,10 @@ public class SourceFolderSelectActivity extends Activity {
             if ((switchPower = device.findService(serviceId)) != null) {
 
                 System.out.println("Service discovered: " + switchPower);
-                executeAction(upnpService, switchPower);
+                //executeAction(upnpService, switchPower);
 
+            } else {
+                System.out.println("Ei osunut");
             }
 
         }
@@ -78,7 +76,61 @@ public class SourceFolderSelectActivity extends Activity {
 
     };
 }
+    /*
+    private Browse myBrowse(AndroidUpnpService upnpService) {
+        return new Browse((Service)upnpService, "0", BrowseFlag.DIRECT_CHILDREN) {
 
+        @Override
+        public void received(ActionInvocation actionInvocation, DIDLContent didl) {
+
+            // Read the DIDL content either using generic Container and Item types...
+            assertEquals(didl.getItems().size(), 2);
+            Item item1 = didl.getItems().get(0);
+            assertEquals(
+                    item1.getTitle(),
+                    "All Secrets Known"
+            );
+            assertEquals(
+                    item1.getFirstPropertyValue(DIDLObject.Property.UPNP.ALBUM.class),
+                    "Black Gives Way To Blue"
+            );
+            assertEquals(
+                    item1.getFirstResource().getProtocolInfo().getContentFormatMimeType().toString(),
+                    "audio/mpeg"
+            );
+            assertEquals(
+                    item1.getFirstResource().getValue(),
+                    "http://10.0.0.1/files/101.mp3"
+            );
+
+            // ... or cast it if you are sure about its type ...
+            assert MusicTrack.CLASS.equals(item1);
+            MusicTrack track1 = (MusicTrack) item1;
+            assertEquals(track1.getTitle(), "All Secrets Known");
+            assertEquals(track1.getAlbum(), "Black Gives Way To Blue");
+            assertEquals(track1.getFirstArtist().getName(), "Alice In Chains");
+            assertEquals(track1.getFirstArtist().getRole(), "Performer");
+
+            MusicTrack track2 = (MusicTrack) didl.getItems().get(1);
+            assertEquals(track2.getTitle(), "Check My Brain");
+
+            // ... which is much nicer for manual parsing, of course!
+
+        }
+
+        @Override
+        public void updateStatus(Browse.Status status) {
+            // Called before and after loading the DIDL content
+        }
+
+        @Override
+        public void failure(ActionInvocation invocation,
+                UpnpResponse operation,
+                String defaultMsg) {
+            // Something wasn't right...
+        }
+    };
+*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +138,7 @@ public class SourceFolderSelectActivity extends Activity {
         setContentView(R.layout.activity_source_folder_select);
 
         getApplicationContext().bindService(
-                new Intent(this, AndroidUpnpServiceImpl.class),
+                new Intent(this, BrowserUpnpService.class),
                 serviceConnection,
                 Context.BIND_AUTO_CREATE
         );
@@ -99,60 +151,6 @@ public class SourceFolderSelectActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-
-
-        new Browse((Service)upnpService, "0", BrowseFlag.DIRECT_CHILDREN) {
-
-            @Override
-            public void received(ActionInvocation actionInvocation, DIDLContent didl) {
-
-                // Read the DIDL content either using generic Container and Item types...
-                assertEquals(didl.getItems().size(), 2);
-                Item item1 = didl.getItems().get(0);
-                assertEquals(
-                        item1.getTitle(),
-                        "All Secrets Known"
-                );
-                assertEquals(
-                        item1.getFirstPropertyValue(DIDLObject.Property.UPNP.ALBUM.class),
-                        "Black Gives Way To Blue"
-                );
-                assertEquals(
-                        item1.getFirstResource().getProtocolInfo().getContentFormatMimeType().toString(),
-                        "audio/mpeg"
-                );
-                assertEquals(
-                        item1.getFirstResource().getValue(),
-                        "http://10.0.0.1/files/101.mp3"
-                );
-
-                // ... or cast it if you are sure about its type ...
-                assert MusicTrack.CLASS.equals(item1);
-                MusicTrack track1 = (MusicTrack) item1;
-                assertEquals(track1.getTitle(), "All Secrets Known");
-                assertEquals(track1.getAlbum(), "Black Gives Way To Blue");
-                assertEquals(track1.getFirstArtist().getName(), "Alice In Chains");
-                assertEquals(track1.getFirstArtist().getRole(), "Performer");
-
-                MusicTrack track2 = (MusicTrack) didl.getItems().get(1);
-                assertEquals(track2.getTitle(), "Check My Brain");
-
-                // ... which is much nicer for manual parsing, of course!
-
-            }
-
-            @Override
-            public void updateStatus(Browse.Status status) {
-                // Called before and after loading the DIDL content
-            }
-
-            @Override
-            public void failure(ActionInvocation invocation,
-                                UpnpResponse operation,
-                                String defaultMsg) {
-                // Something wasn't right...
-            }
-        };
 
 
     }
