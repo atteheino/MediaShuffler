@@ -59,6 +59,14 @@ public class SourceFolderSelectActivity extends Activity {
         }
     };
 
+    /**
+     * Tähän pitää kirjoittaa funktio joka tutkii jo rekisterissä olevien laitteiden palvelut ja
+     * kiinnittyy oikeaan. Sitten voidaan lisätä kuuntelija browse metodille. Tätä rekisterikuuntelijaa ei tarvita
+     * sillä sellainen on jo ja se on globaali.!!
+     */
+
+
+
     private RegistryListener createRegistryListener(final AndroidUpnpService upnpService) {
     return new DefaultRegistryListener() {
 
