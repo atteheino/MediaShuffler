@@ -269,9 +269,9 @@ public class BrowserActivity extends ListActivity {
         @Override
         public String toString() {
             String name =
-                    device.getDetails() != null && device.getDetails().getFriendlyName() != null
-                            ? device.getDetails().getFriendlyName()
-                            : device.getDisplayString();
+                    device.getDetails() != null && device.getDetails().getFriendlyName() != null && device.getType().getType() != null
+                            ? device.getDetails().getFriendlyName() + " " + device.getType().getType()
+                            : device.getDisplayString() + " " + device.getType().getType();
             // Display a little star while the device is being loaded (see performance optimization earlier)
             return device.isFullyHydrated() ? name : name + " *";
         }
