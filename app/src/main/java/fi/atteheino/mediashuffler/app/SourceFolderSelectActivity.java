@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import org.teleal.cling.android.AndroidUpnpService;
 import org.teleal.cling.controlpoint.ActionCallback;
@@ -19,13 +21,13 @@ import org.teleal.cling.model.meta.RemoteService;
 import org.teleal.cling.model.meta.Service;
 import org.teleal.cling.model.types.ServiceId;
 import org.teleal.cling.model.types.UDAServiceId;
-import org.teleal.cling.registry.DefaultRegistryListener;
-import org.teleal.cling.registry.Registry;
-import org.teleal.cling.registry.RegistryListener;
 import org.teleal.cling.support.contentdirectory.callback.Browse;
 import org.teleal.cling.support.model.BrowseFlag;
 import org.teleal.cling.support.model.DIDLContent;
-import org.teleal.cling.support.model.item.Item;
+import org.teleal.cling.support.model.container.Container;
+
+import java.util.Collection;
+import java.util.List;
 
 
 public class SourceFolderSelectActivity extends Activity {
@@ -36,20 +38,22 @@ public class SourceFolderSelectActivity extends Activity {
     AndroidUpnpService upnpService;
     private ServiceId serviceId = null;
     private Service mediaServerService;
+    private String level = "0";
+    private TextView sourceFolderTextView;
 
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             upnpService = (AndroidUpnpService) service;
             serviceId = new UDAServiceId(options.getDLNADeviceUDN());
             // Add a listener for device registration events
-            upnpService.getRegistry().addListener(
+            /*upnpService.getRegistry().addListener(
                     createRegistryListener(upnpService)
-            );
+            );*/
 
             // Broadcast a search message for all devices
-            upnpService.getControlPoint().search(
+            //upnpService.getControlPoint().search();
 
-            );
+            findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
         }
         public void onServiceDisconnected(ComponentName className) {
             upnpService.getRegistry().removeAllLocalDevices();
@@ -59,48 +63,26 @@ public class SourceFolderSelectActivity extends Activity {
         }
     };
 
-    /**
-     * Tähän pitää kirjoittaa funktio joka tutkii jo rekisterissä olevien laitteiden palvelut ja
-     * kiinnittyy oikeaan. Sitten voidaan lisätä kuuntelija browse metodille. Tätä rekisterikuuntelijaa ei tarvita
-     * sillä sellainen on jo ja se on globaali.!!
-     */
-
-
-
-    private RegistryListener createRegistryListener(final AndroidUpnpService upnpService) {
-    return new DefaultRegistryListener() {
-
-        @Override
-        public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-
-            System.out.println("Device Was found: " + device.getDisplayString());
-            if (device.getIdentity().getUdn().getIdentifierString().equals(options.getDLNADeviceUDN())) {
-
-                RemoteService[] services = device.getServices();
-                for (Service service : services) {
-                    if (service.getServiceType().equals("urn:upnp-org:serviceId:ContentDirectory")) {
-                        mediaServerService = service;
-                    }
-                }
-                /*if ((mediaServerService = ) != null) {
-
-                    System.out.println("Service discovered: " + mediaServerService);
-                    //executeAction(upnpService, switchPower);
-
-                } else {
-                    System.out.println("Ei osunut");
-                }*/
-
-                ActionCallback complexBrowseAction =
-                        new Browse(mediaServerService, "0", BrowseFlag.DIRECT_CHILDREN) {
-
+    private void findCorrectDevice(Collection<RemoteDevice> remoteDevices) {
+        for (RemoteDevice remoteDevice : remoteDevices) {
+            if (remoteDevice.getIdentity().getUdn().getIdentifierString().equals(options.getDLNADeviceUDN())) {
+                RemoteService[] services = remoteDevice.getRoot().findServices();
+                for (RemoteService remoteService : services) {
+                    if (remoteService.getServiceType().getType().equals("ContentDirectory")) {
+                        ActionCallback callback = new Browse((Service) remoteService, level, BrowseFlag.DIRECT_CHILDREN) {
                             @Override
                             public void received(ActionInvocation actionInvocation, DIDLContent didl) {
 
                                 // Read the DIDL content either using generic Container and Item types...
 
-                                Item item1 = didl.getItems().get(0);
 
+                                StringBuilder sb = new StringBuilder();
+                                List<Container> containers = didl.getContainers();
+                                for (Container container : containers) {
+                                    sb.append("ID: ").append(container.getId()).append(" ");
+                                    sb.append("Title:").append(container.getTitle()).append(" ");
+                                }
+                                setSourceFolderTextViewText(sb.toString());
                             }
 
                             @Override
@@ -115,20 +97,29 @@ public class SourceFolderSelectActivity extends Activity {
                                 // Something wasn't right...
                             }
                         };
-            } else {
-                System.out.println("Device was not a match");
+
+                        upnpService.getControlPoint().execute(callback);
+                    }
+                }
             }
         }
+    }
 
-        @Override
-        public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+    /**
+     * Tähän pitää kirjoittaa funktio joka tutkii jo rekisterissä olevien laitteiden palvelut ja
+     * kiinnittyy oikeaan. Sitten voidaan lisätä kuuntelija browse metodille. Tätä rekisterikuuntelijaa ei tarvita
+     * sillä sellainen on jo ja se on globaali.!!
+     */
 
-            if ((mediaServerService = device.findService(serviceId)) != null) {
-                System.out.println("Service disappeared: " + mediaServerService);
+
+    private void setSourceFolderTextViewText(final String content) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                sourceFolderTextView.setText(content);
             }
-        }
+        });
 
-    };
     }
 
 
@@ -146,7 +137,23 @@ public class SourceFolderSelectActivity extends Activity {
 
 
         options = (Options)getIntent().getSerializableExtra("Options");
+        if (getIntent().getStringExtra("selected_level") != null) {
+            level = getIntent().getStringExtra("selected_level");
+        }
+
+        sourceFolderTextView = (TextView) findViewById(R.id.sourceFolderTextView);
+        sourceFolderTextView.setOnClickListener(sourceFolderTextViewListener);
     }
+
+    private View.OnClickListener sourceFolderTextViewListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent sourceFolderSelectActivity = new Intent(getApplicationContext(), SourceFolderSelectActivity.class);
+            sourceFolderSelectActivity.putExtra("Options", options);
+            sourceFolderSelectActivity.putExtra("selected_level", "1");
+            startActivity(sourceFolderSelectActivity);
+        }
+    };
 
     @Override
     protected void onResume() {
