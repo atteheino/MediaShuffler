@@ -128,6 +128,7 @@ public class SourceFolderSelectActivity extends Activity {
         ListView listView = (ListView) findViewById(R.id.sourceFolderListView);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(mMessageClickedHandler);
+        listView.setOnItemLongClickListener(itemLongClickListener);
 
     }
 
@@ -139,6 +140,19 @@ public class SourceFolderSelectActivity extends Activity {
             TextView idView = (TextView) v.findViewById(R.id.folderIdTextView);
             sourceFolderSelectActivity.putExtra("selected_level", idView.getText().toString());
             startActivity(sourceFolderSelectActivity);
+        }
+    };
+
+    private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
+            Folder folder = (Folder) adapterView.getItemAtPosition(position);
+            options.setSourceFolderID(folder.getId());
+            options.setSourceFolderName(folder.getName());
+            mainActivityIntent.putExtra("Options", options);
+            startActivity(mainActivityIntent);
+            return true;
         }
     };
 

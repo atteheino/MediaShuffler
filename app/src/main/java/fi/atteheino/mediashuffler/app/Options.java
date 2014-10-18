@@ -10,6 +10,24 @@ public class Options implements Serializable{
     private String DLNADevice;
     private String DLNADeviceUDN;
     private String sourceFolderID;
+    private String sourceFolderName;
+    private String targetFolderName;
+
+    public String getTargetFolderName() {
+        return targetFolderName;
+    }
+
+    public void setTargetFolderName(String targetFolderName) {
+        this.targetFolderName = targetFolderName;
+    }
+
+    public String getSourceFolderName() {
+        return sourceFolderName;
+    }
+
+    public void setSourceFolderName(String sourceFolderName) {
+        this.sourceFolderName = sourceFolderName;
+    }
 
     public String getSourceFolderID() {
         return sourceFolderID;

@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import com.codeproject.directorychooser.DirectoryChooserDialog;
+
 
 public class MainActivity extends Activity {
     private int selectedSizeOfCollection=0;
@@ -40,6 +42,9 @@ public class MainActivity extends Activity {
         Button sourceFolderButton = (Button) findViewById(R.id.selectSourceFolderButton);
         sourceFolderButton.setOnClickListener(sourceFolderButtonListener);
 
+        Button targetFolderButton = (Button) findViewById(R.id.selectTargetFolderButton);
+        targetFolderButton.setOnClickListener(targetFolderButtonListener);
+
     }
 
     private View.OnClickListener sourceButtonListener = new View.OnClickListener() {
@@ -60,6 +65,32 @@ public class MainActivity extends Activity {
         }
     };
 
+    private View.OnClickListener targetFolderButtonListener = new View.OnClickListener() {
+        private String m_chosenDir = "";
+        private boolean m_newFolderEnabled = true;
+
+        @Override
+        public void onClick(View view) {
+            // Create DirectoryChooserDialog and register a callback
+            DirectoryChooserDialog directoryChooserDialog =
+                    new DirectoryChooserDialog(MainActivity.this,
+                            new DirectoryChooserDialog.ChosenDirectoryListener() {
+                                @Override
+                                public void onChosenDir(String chosenDir) {
+                                    m_chosenDir = chosenDir;
+                                    options.setTargetFolderName(chosenDir);
+                                    setTargetFolderLabel(chosenDir);
+                                }
+                            }
+                    );
+            // Toggle new folder button enabling
+            directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
+            // Load directory chooser dialog for initial 'm_chosenDir' directory.
+            // The registered callback will be called upon final directory selection.
+            directoryChooserDialog.chooseDirectory(m_chosenDir);
+        }
+    };
+
 
     @Override
     protected void onResume() {
@@ -70,10 +101,20 @@ public class MainActivity extends Activity {
             }
 
             if (options.getDLNADevice()!=null) {
-                TextView sourceLable = (TextView) findViewById(R.id.sourceLabel);
-                sourceLable.setText(options.getDLNADevice()+"("+options.getDLNADeviceUDN()+")");
+                TextView sourceLabel = (TextView) findViewById(R.id.sourceLabel);
+                sourceLabel.setText(options.getDLNADevice() + "(" + options.getDLNADeviceUDN() + ")");
+            }
+
+            if (options.getSourceFolderName() != null && options.getSourceFolderID() != null) {
+                TextView sourceFolderLabel = (TextView) findViewById(R.id.sourcePathLabel);
+                sourceFolderLabel.setText(options.getSourceFolderName() + "(" + options.getSourceFolderID() + ")");
             }
         }
+    }
+
+    private void setTargetFolderLabel(String selectedDir) {
+        TextView selectedTargetDirLabel = (TextView) findViewById(R.id.targetPathLabel);
+        selectedTargetDirLabel.setText(selectedDir);
     }
 
     @Override
