@@ -23,5 +23,6 @@
     <string name="start_transfer_activity_main">Start transfer</string>
     <string name="source_activity_main">Source:</string>
     <string name="title_activity_source_folder_select">SourceFolderSelectActivity</string>
+    <string name="set_as_root">Set as root</string>
 
 </resources>

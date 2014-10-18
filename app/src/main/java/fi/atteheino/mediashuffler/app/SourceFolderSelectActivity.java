@@ -10,6 +10,8 @@ import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.teleal.cling.android.AndroidUpnpService;
@@ -19,40 +21,30 @@ import org.teleal.cling.model.message.UpnpResponse;
 import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.RemoteService;
 import org.teleal.cling.model.meta.Service;
-import org.teleal.cling.model.types.ServiceId;
-import org.teleal.cling.model.types.UDAServiceId;
 import org.teleal.cling.support.contentdirectory.callback.Browse;
 import org.teleal.cling.support.model.BrowseFlag;
 import org.teleal.cling.support.model.DIDLContent;
 import org.teleal.cling.support.model.container.Container;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import fi.atteheino.mediashuffler.app.adapter.FolderSelectArrayAdapter;
 
 
 public class SourceFolderSelectActivity extends Activity {
 
 
+    AndroidUpnpService upnpService;
+    FolderSelectArrayAdapter adapter;
+    private String level = "0";
     private Options options;
 
-    AndroidUpnpService upnpService;
-    private ServiceId serviceId = null;
-    private Service mediaServerService;
-    private String level = "0";
-    private TextView sourceFolderTextView;
 
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             upnpService = (AndroidUpnpService) service;
-            serviceId = new UDAServiceId(options.getDLNADeviceUDN());
-            // Add a listener for device registration events
-            /*upnpService.getRegistry().addListener(
-                    createRegistryListener(upnpService)
-            );*/
-
-            // Broadcast a search message for all devices
-            //upnpService.getControlPoint().search();
-
             findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
         }
         public void onServiceDisconnected(ComponentName className) {
@@ -73,16 +65,12 @@ public class SourceFolderSelectActivity extends Activity {
                             @Override
                             public void received(ActionInvocation actionInvocation, DIDLContent didl) {
 
-                                // Read the DIDL content either using generic Container and Item types...
-
-
-                                StringBuilder sb = new StringBuilder();
+                                List<Folder> folders = new ArrayList<Folder>();
                                 List<Container> containers = didl.getContainers();
                                 for (Container container : containers) {
-                                    sb.append("ID: ").append(container.getId()).append(" ");
-                                    sb.append("Title:").append(container.getTitle()).append(" ");
+                                    folders.add(new Folder(container.getId(), container.getTitle()));
                                 }
-                                setSourceFolderTextViewText(sb.toString());
+                                updateAdapter(folders);
                             }
 
                             @Override
@@ -105,23 +93,18 @@ public class SourceFolderSelectActivity extends Activity {
         }
     }
 
-    /**
-     * Tähän pitää kirjoittaa funktio joka tutkii jo rekisterissä olevien laitteiden palvelut ja
-     * kiinnittyy oikeaan. Sitten voidaan lisätä kuuntelija browse metodille. Tätä rekisterikuuntelijaa ei tarvita
-     * sillä sellainen on jo ja se on globaali.!!
-     */
 
-
-    private void setSourceFolderTextViewText(final String content) {
+    private void updateAdapter(final List<Folder> folders){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                sourceFolderTextView.setText(content);
+                adapter.clear();
+                adapter.addAll(folders);
+                adapter.notifyDataSetChanged();
             }
         });
 
     }
-
 
 
     @Override
@@ -135,17 +118,32 @@ public class SourceFolderSelectActivity extends Activity {
                 Context.BIND_AUTO_CREATE
         );
 
-
+        // Get the options needed
         options = (Options)getIntent().getSerializableExtra("Options");
         if (getIntent().getStringExtra("selected_level") != null) {
             level = getIntent().getStringExtra("selected_level");
         }
 
-        sourceFolderTextView = (TextView) findViewById(R.id.sourceFolderTextView);
-        sourceFolderTextView.setOnClickListener(sourceFolderTextViewListener);
+        adapter = new FolderSelectArrayAdapter(this, R.layout.folder_select_array_adapter);
+        ListView listView = (ListView) findViewById(R.id.sourceFolderListView);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(mMessageClickedHandler);
+
     }
 
-    private View.OnClickListener sourceFolderTextViewListener = new View.OnClickListener() {
+    // Create a message handling object as an anonymous class.
+    private AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView parent, View v, int position, long id) {
+            Intent sourceFolderSelectActivity = new Intent(getApplicationContext(), SourceFolderSelectActivity.class);
+            sourceFolderSelectActivity.putExtra("Options", options);
+            TextView idView = (TextView) v.findViewById(R.id.folderIdTextView);
+            sourceFolderSelectActivity.putExtra("selected_level", idView.getText().toString());
+            startActivity(sourceFolderSelectActivity);
+        }
+    };
+
+
+   /* private View.OnClickListener sourceFolderTextViewListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             Intent sourceFolderSelectActivity = new Intent(getApplicationContext(), SourceFolderSelectActivity.class);
@@ -153,14 +151,11 @@ public class SourceFolderSelectActivity extends Activity {
             sourceFolderSelectActivity.putExtra("selected_level", "1");
             startActivity(sourceFolderSelectActivity);
         }
-    };
+    };*/
 
     @Override
     protected void onResume() {
         super.onResume();
-
-
-
     }
 
     @Override

@@ -9,6 +9,15 @@ public class Options implements Serializable{
 
     private String DLNADevice;
     private String DLNADeviceUDN;
+    private String sourceFolderID;
+
+    public String getSourceFolderID() {
+        return sourceFolderID;
+    }
+
+    public void setSourceFolderID(String sourceFolderID) {
+        this.sourceFolderID = sourceFolderID;
+    }
 
     public String getDLNADevice() {
         return DLNADevice;
