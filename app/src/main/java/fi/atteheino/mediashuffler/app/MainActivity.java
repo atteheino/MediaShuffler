@@ -45,7 +45,19 @@ public class MainActivity extends Activity {
         Button targetFolderButton = (Button) findViewById(R.id.selectTargetFolderButton);
         targetFolderButton.setOnClickListener(targetFolderButtonListener);
 
+        Button startTransferButton = (Button) findViewById(R.id.startTransferButton);
+        startTransferButton.setOnClickListener(startTransferButtonListener);
+
     }
+
+    private View.OnClickListener startTransferButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent startTransferIntent = new Intent(getApplicationContext(), ShuffleActivity.class);
+            startTransferIntent.putExtra("Options", options);
+            startActivity(startTransferIntent);
+        }
+    };
 
     private View.OnClickListener sourceButtonListener = new View.OnClickListener() {
         @Override

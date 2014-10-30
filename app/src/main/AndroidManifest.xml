@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="fi.atteheino.mediashuffler.app" >
+    package="fi.atteheino.mediashuffler.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -12,14 +12,13 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name="fi.atteheino.mediashuffler.app.BrowserActivity"
-            android:label="@string/app_name" >
-        </activity>
+            android:label="@string/app_name"></activity>
         <activity
             android:name="fi.atteheino.mediashuffler.app.MainActivity"
-            android:label="@string/title_activity_main" >
+            android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,12 +31,22 @@
         <activity
             android:name="fi.atteheino.mediashuffler.app.SourceFolderSelectActivity"
             android:label="@string/title_activity_source_folder_select"
-            android:parentActivityName="fi.atteheino.mediashuffler.app.MainActivity" >
+            android:parentActivityName="fi.atteheino.mediashuffler.app.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
-        <service android:name="org.teleal.cling.android.AndroidUpnpServiceImpl"/>
+
+        <service android:name="org.teleal.cling.android.AndroidUpnpServiceImpl" />
+
+        <activity
+            android:name="fi.atteheino.mediashuffler.app.ShuffleActivity"
+            android:label="@string/title_activity_shuffle"
+            android:parentActivityName="fi.atteheino.mediashuffler.app.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
     </application>
 
 </manifest>

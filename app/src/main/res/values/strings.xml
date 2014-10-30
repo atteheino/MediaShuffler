@@ -24,5 +24,9 @@
     <string name="source_activity_main">Source:</string>
     <string name="title_activity_source_folder_select">SourceFolderSelectActivity</string>
     <string name="set_as_root">Set as root</string>
+    <string name="title_activity_shuffle">ShuffleActivity</string>
+    <string name="title_shuffling_header">Shuffling the files. Please wait.</string>
+    <string name="cancel_button">Cancel</string>
+
 
 </resources>
