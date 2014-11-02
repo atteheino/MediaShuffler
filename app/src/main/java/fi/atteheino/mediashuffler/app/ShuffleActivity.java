@@ -18,6 +18,7 @@ import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.RemoteService;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
@@ -61,9 +62,28 @@ public class ShuffleActivity extends Activity {
 
 
     private Observer myCallbackObserver = new Observer() {
+        int countOfBrowsers = 0;
         @Override
         public void update(Observable observable, Object o) {
-
+            synchronized (this) {
+                // If there is no parameter passed, then the browse method has been called. In this case
+                // we shal add counter value.
+                // In other case, we will decrease counter value and add values to map
+                if (o == null) {
+                    countOfBrowsers++;
+                } else {
+                    List<String> tempUris = (List<String>) o;
+                    if (tempUris != null && tempUris.size() != 0) {
+                        URIs.addAll(tempUris);
+                    }
+                    countOfBrowsers--;
+                }
+                // Now we are waiting for the situation where countOfBrowsers is "0".
+                // When this occurs, we know that all URI's have been gathered and we can continue with the processing.
+                if (countOfBrowsers == 0) {
+                    transferFiles();
+                }
+            }
         }
     };
 
@@ -82,7 +102,7 @@ public class ShuffleActivity extends Activity {
         options = (Options) getIntent().getSerializableExtra("Options");
 
         mProgressBar = (ProgressBar) findViewById((R.id.progressBar));
-        mProgressBar.setProgress(0);
+        mProgressBar.setIndeterminate(true);
 
         final View cancelButton = findViewById(R.id.cancelButton);
         cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -93,6 +113,12 @@ public class ShuffleActivity extends Activity {
 
     }
 
+    public void transferFiles() {
+        //Let's stop the progressbar and start feeding it correct values.
+        mProgressBar.setIndeterminate(false);
+        mProgressBar.setProgress(0);
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
