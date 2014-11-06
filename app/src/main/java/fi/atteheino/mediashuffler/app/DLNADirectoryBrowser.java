@@ -11,6 +11,7 @@ import org.teleal.cling.support.model.BrowseFlag;
 import org.teleal.cling.support.model.DIDLContent;
 import org.teleal.cling.support.model.container.Container;
 import org.teleal.cling.support.model.item.Item;
+import org.teleal.cling.support.model.item.MusicTrack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +41,14 @@ public class DLNADirectoryBrowser extends Observable {
         ActionCallback callback = new Browse((Service) remoteService, sourceFolderID, BrowseFlag.DIRECT_CHILDREN) {
             @Override
             public void received(ActionInvocation actionInvocation, DIDLContent didl) {
-                List<String> URIs = new ArrayList<String>();
+                List<MusicTrack> tracks = new ArrayList<MusicTrack>();
                 //Get list of files in the folder and add them to the global list of files..
                 final List<Item> items = didl.getItems();
                 for (Item item : items) {
-                    URIs.add(item.getFirstResource().getValue());
+                    //Let's check that this is actually a music file before adding.
+                    if (MusicTrack.CLASS.equals(item)) {
+                        tracks.add((MusicTrack) item);
+                    }
                 }
                 //Get sub-folders and start to descend into them
                 final List<Container> containers = didl.getContainers();
@@ -53,7 +57,7 @@ public class DLNADirectoryBrowser extends Observable {
                     dlnaDirectoryBrowser.browseThruFoldersAndGetFileUris(container.getId());
                 }
                 setChanged();
-                notifyObservers(URIs);
+                notifyObservers(tracks);
 
             }
 

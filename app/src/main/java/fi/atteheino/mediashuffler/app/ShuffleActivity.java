@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import org.teleal.cling.android.AndroidUpnpService;
 import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.RemoteService;
+import org.teleal.cling.support.model.item.MusicTrack;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +31,7 @@ public class ShuffleActivity extends Activity {
     private Options options;
     private ShuffleFilesTask mShuffleTask;
     private ProgressBar mProgressBar;
-    private Vector<String> URIs = new Vector<String>();
+    private Vector<MusicTrack> musicTracks = new Vector<MusicTrack>();
 
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -72,9 +73,9 @@ public class ShuffleActivity extends Activity {
                 if (o == null) {
                     countOfBrowsers++;
                 } else {
-                    List<String> tempUris = (List<String>) o;
+                    List<MusicTrack> tempUris = (List<MusicTrack>) o;
                     if (tempUris != null && tempUris.size() != 0) {
-                        URIs.addAll(tempUris);
+                        musicTracks.addAll(tempUris);
                     }
                     countOfBrowsers--;
                 }
