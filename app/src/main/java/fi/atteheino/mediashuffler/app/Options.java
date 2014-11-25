@@ -1,6 +1,9 @@
 package fi.atteheino.mediashuffler.app;
 
+import org.teleal.cling.support.model.item.MusicTrack;
+
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Atte on 7.6.2014.
@@ -12,6 +15,15 @@ public class Options implements Serializable{
     private String sourceFolderID;
     private String sourceFolderName;
     private String targetFolderName;
+    private List<MusicTrack> musicTrackList;
+
+    public List<MusicTrack> getMusicTrackList() {
+        return musicTrackList;
+    }
+
+    public void setMusicTrackList(List<MusicTrack> musicTrackList) {
+        this.musicTrackList = musicTrackList;
+    }
 
     public String getTargetFolderName() {
         return targetFolderName;

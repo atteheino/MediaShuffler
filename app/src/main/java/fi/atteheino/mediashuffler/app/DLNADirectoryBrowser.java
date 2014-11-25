@@ -79,4 +79,5 @@ public class DLNADirectoryBrowser extends Observable {
         notifyObservers();
 
     }
+
 }

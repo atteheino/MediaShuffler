@@ -24,6 +24,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
+import fi.atteheino.mediashuffler.app.utils.Downloader;
+
 
 public class ShuffleActivity extends Activity {
 
@@ -118,7 +120,17 @@ public class ShuffleActivity extends Activity {
         //Let's stop the progressbar and start feeding it correct values.
         mProgressBar.setIndeterminate(false);
         mProgressBar.setProgress(0);
+        options.setMusicTrackList(generateRandomList());
+        //TODO: Add MusicTracks to Options object
+        //TODO: Start ShuffleFilesTask. Pass Options as parameter
+        //TODO: Start processing URL's in MusicTracks collection.
+        //TODO: Create random list of MusicTracks limited by the selected max size
+        //TODO: Should I backup the previous collection?
+        //TODO: Should the old files be removed or only add new files? (Add this as feature to be implemented in the future)
+    }
 
+    private List<MusicTrack> generateRandomList() {
+        return null;
     }
 
     @Override
@@ -151,7 +163,40 @@ public class ShuffleActivity extends Activity {
     private class ShuffleFilesTask extends AsyncTask<Options, Integer, String> {
         @Override
         protected String doInBackground(Options... optionses) {
+            final List<MusicTrack> musicTrackList = optionses[0].getMusicTrackList();
+            int counter = 0;
+            for (MusicTrack track : musicTrackList) {
+                Downloader.downloadFile(track.getFirstResource().getValue(),
+                        optionses[0].getTargetFolderName(),
+                        getFilename(track));
+                counter++;
+                publishProgress((counter / musicTrackList.size()) * 100);
+            }
+
             return null;
+        }
+
+        private String getFilename(MusicTrack track) {
+            return new StringBuilder().append(track.getOriginalTrackNumber())
+                    .append(" ")
+                    .append(track.getFirstArtist())
+                    .append(" ")
+                    .append(track.getTitle())
+                    .append(getExtension(track)).toString();
+        }
+
+        private String getExtension(MusicTrack track) {
+
+            final String mimetype = track.getFirstResource().getProtocolInfo().getContentFormatMimeType().toString();
+            if (mimetype.equalsIgnoreCase("audio/mpeg")) {
+                return ".mp3";
+            } else if (mimetype.equalsIgnoreCase("audio/ogg")) {
+                return ".ogg";
+            } else if (mimetype.equalsIgnoreCase("audio/mp4")) {
+                return ".mp4";
+            } else if (mimetype.equalsIgnoreCase("audio/vnd.wav")) {
+                return ".wav";
+            } else return ".mp3";
         }
 
         @Override
