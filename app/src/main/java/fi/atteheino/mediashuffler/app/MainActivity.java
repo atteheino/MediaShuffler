@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void onValueChange(NumberPicker numberPicker, int i, int i2) {
                     selectedSizeOfCollection = i2;
+                    options.setTargetSizeMegaBytes(selectedSizeOfCollection);
                 }
             });
         }
@@ -108,6 +109,8 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if(getIntent()!=null) {
+
+
             if (getIntent().getSerializableExtra("Options") != null) {
                 options = (Options) getIntent().getSerializableExtra("Options");
             }
@@ -120,6 +123,16 @@ public class MainActivity extends Activity {
             if (options.getSourceFolderName() != null && options.getSourceFolderID() != null) {
                 TextView sourceFolderLabel = (TextView) findViewById(R.id.sourcePathLabel);
                 sourceFolderLabel.setText(options.getSourceFolderName() + "(" + options.getSourceFolderID() + ")");
+            }
+
+            if (options.getTargetSizeMegaBytes() > 0) {
+                NumberPicker numberPicker = (NumberPicker) findViewById(R.id.sizeOfCollection);
+                numberPicker.setValue(options.getTargetSizeMegaBytes());
+            }
+
+            if (options.getTargetFolderName() != null) {
+                TextView targetFolderLabel = (TextView) findViewById(R.id.targetPathLabel);
+                targetFolderLabel.setText(options.getTargetFolderName());
             }
         }
     }

@@ -22,7 +22,7 @@ public class Downloader {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
             urlConnection.setRequestMethod("GET");
-            urlConnection.setDoOutput(true);
+            //urlConnection.setDoOutput(true);
 
             //connect
             urlConnection.connect();

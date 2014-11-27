@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,10 +19,12 @@ import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.RemoteService;
 import org.teleal.cling.support.model.item.MusicTrack;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Random;
 import java.util.Vector;
 
 import fi.atteheino.mediashuffler.app.utils.Downloader;
@@ -84,7 +87,13 @@ public class ShuffleActivity extends Activity {
                 // Now we are waiting for the situation where countOfBrowsers is "0".
                 // When this occurs, we know that all URI's have been gathered and we can continue with the processing.
                 if (countOfBrowsers == 0) {
-                    transferFiles();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            transferFiles();
+                        }
+                    });
+
                 }
             }
         }
@@ -121,16 +130,40 @@ public class ShuffleActivity extends Activity {
         mProgressBar.setIndeterminate(false);
         mProgressBar.setProgress(0);
         options.setMusicTrackList(generateRandomList());
-        //TODO: Add MusicTracks to Options object
-        //TODO: Start ShuffleFilesTask. Pass Options as parameter
-        //TODO: Start processing URL's in MusicTracks collection.
-        //TODO: Create random list of MusicTracks limited by the selected max size
+        mShuffleTask = new ShuffleFilesTask();
+        mShuffleTask.execute(options);
         //TODO: Should I backup the previous collection?
         //TODO: Should the old files be removed or only add new files? (Add this as feature to be implemented in the future)
     }
 
     private List<MusicTrack> generateRandomList() {
-        return null;
+
+        List<MusicTrack> randomMusicTrackList = new ArrayList<MusicTrack>();
+        final long targetSizeMegaBytes = options.getTargetSizeMegaBytes();
+        final long MEGABYTE = 1024L * 1024L;
+        long currentSizeMegaBytes = 0;
+        Random randomizer = new Random();
+        /**
+         * Let's check that the collection we have collected is smaller than the maximum set by the user
+         * and that there is still space left for some song (5 megabytes).
+         * We must also check that there are songs left to add.
+         */
+        while (currentSizeMegaBytes < targetSizeMegaBytes
+                && targetSizeMegaBytes - currentSizeMegaBytes > 5L
+                && randomMusicTrackList.size() < musicTracks.size()) {
+            int randomSongIndex = randomizer.nextInt(musicTracks.size() - 1);
+            if (musicTracks.get(randomSongIndex) != null
+                    || musicTracks.get(randomSongIndex).getFirstResource().getSize() != null) {
+                if ((musicTracks.get(randomSongIndex).getFirstResource().getSize() / MEGABYTE) + currentSizeMegaBytes < targetSizeMegaBytes) {
+                    randomMusicTrackList.add(musicTracks.get(randomSongIndex));
+                    currentSizeMegaBytes += musicTracks.get(randomSongIndex).getFirstResource().getSize() / MEGABYTE;
+                } else {
+                    // Collection if full, better to return it as fast as possible.
+                    return randomMusicTrackList;
+                }
+            }
+        }
+        return randomMusicTrackList;
     }
 
     @Override
@@ -161,28 +194,34 @@ public class ShuffleActivity extends Activity {
 
 
     private class ShuffleFilesTask extends AsyncTask<Options, Integer, String> {
+        private static final String TAG = "ShuffleFilesTask";
         @Override
         protected String doInBackground(Options... optionses) {
-            final List<MusicTrack> musicTrackList = optionses[0].getMusicTrackList();
+            final List<MusicTrack> randomMusicTrackList = optionses[0].getMusicTrackList();
             int counter = 0;
-            for (MusicTrack track : musicTrackList) {
+            for (MusicTrack track : randomMusicTrackList) {
                 Downloader.downloadFile(track.getFirstResource().getValue(),
                         optionses[0].getTargetFolderName(),
                         getFilename(track));
                 counter++;
-                publishProgress((counter / musicTrackList.size()) * 100);
+                publishProgress((counter / randomMusicTrackList.size()) * 100);
+                // Escape early if cancel() is called
+                if (isCancelled()) break;
             }
 
             return null;
         }
 
         private String getFilename(MusicTrack track) {
-            return new StringBuilder().append(track.getOriginalTrackNumber())
-                    .append(" ")
-                    .append(track.getFirstArtist())
+            final StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(track.getOriginalTrackNumber())
+                    .append("-")
+                    .append(track.getFirstArtist().toString().replaceAll("[[^a-ö][^0-9][^-_!]]", ""))
                     .append(" ")
                     .append(track.getTitle())
-                    .append(getExtension(track)).toString();
+                    .append(getExtension(track));
+            Log.d(TAG, "filename: " + stringBuilder.toString());
+            return stringBuilder.toString();
         }
 
         private String getExtension(MusicTrack track) {

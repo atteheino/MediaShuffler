@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by Atte on 7.6.2014.
  */
-public class Options implements Serializable{
+public class Options implements Serializable {
 
     private String DLNADevice;
     private String DLNADeviceUDN;
@@ -16,6 +16,15 @@ public class Options implements Serializable{
     private String sourceFolderName;
     private String targetFolderName;
     private List<MusicTrack> musicTrackList;
+    private int targetSizeMegaBytes;
+
+    public int getTargetSizeMegaBytes() {
+        return targetSizeMegaBytes;
+    }
+
+    public void setTargetSizeMegaBytes(int targetSizeMegaBytes) {
+        this.targetSizeMegaBytes = targetSizeMegaBytes;
+    }
 
     public List<MusicTrack> getMusicTrackList() {
         return musicTrackList;
