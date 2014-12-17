@@ -11,8 +11,8 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.teleal.cling.android.AndroidUpnpService;
 import org.teleal.cling.model.meta.RemoteDevice;
@@ -27,19 +27,22 @@ import java.util.Observer;
 import java.util.Random;
 import java.util.Vector;
 
-import fi.atteheino.mediashuffler.app.utils.Downloader;
+import fi.atteheino.mediashuffler.app.service.DownloadService;
 
 
 public class ShuffleActivity extends Activity {
 
     AndroidUpnpService upnpService;
     private Options options;
-    private ShuffleFilesTask mShuffleTask;
     private ProgressBar mProgressBar;
     private Vector<MusicTrack> musicTracks = new Vector<MusicTrack>();
+    private static final String TAG = "ShuffleActivity";
+    private Intent mDownloadServiceIntent;
+
 
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.d(TAG, "onServiceConnected called from thread " + Thread.currentThread().getId());
             upnpService = (AndroidUpnpService) service;
             findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
         }
@@ -53,6 +56,7 @@ public class ShuffleActivity extends Activity {
     };
 
     private void findCorrectDevice(Collection<RemoteDevice> remoteDevices) {
+        Log.d(TAG, "findCorrectDevice called from thread " + Thread.currentThread().getId());
         for (RemoteDevice remoteDevice : remoteDevices) {
             if (remoteDevice.getIdentity().getUdn().getIdentifierString().equals(options.getDLNADeviceUDN())) {
                 RemoteService[] services = remoteDevice.getRoot().findServices();
@@ -73,7 +77,7 @@ public class ShuffleActivity extends Activity {
         public void update(Observable observable, Object o) {
             synchronized (this) {
                 // If there is no parameter passed, then the browse method has been called. In this case
-                // we shal add counter value.
+                // we shall add counter value.
                 // In other case, we will decrease counter value and add values to map
                 if (o == null) {
                     countOfBrowsers++;
@@ -115,23 +119,60 @@ public class ShuffleActivity extends Activity {
 
         mProgressBar = (ProgressBar) findViewById((R.id.progressBar));
         mProgressBar.setIndeterminate(true);
+    }
 
-        final View cancelButton = findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                onCancelAdd();
-            }
-        });
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart called from thread " + Thread.currentThread().getId());
+    }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "onRestart called from thread " + Thread.currentThread().getId());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume called from thread " + Thread.currentThread().getId());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause called from thread " + Thread.currentThread().getId());
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop called from thread " + Thread.currentThread().getId());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy called from thread " + Thread.currentThread().getId());
     }
 
     public void transferFiles() {
+        Log.d(TAG, "transferFiles called from thread " + Thread.currentThread().getId());
         //Let's stop the progressbar and start feeding it correct values.
-        mProgressBar.setIndeterminate(false);
-        mProgressBar.setProgress(0);
-        options.setMusicTrackList(generateRandomList());
-        mShuffleTask = new ShuffleFilesTask();
-        mShuffleTask.execute(options);
+        if (mDownloadServiceIntent == null) {
+            mProgressBar.setIndeterminate(false);
+            mProgressBar.setProgress(0);
+            mProgressBar.invalidate();
+            ((TextView) findViewById(R.id.statusText)).setText(R.string.shuffle_status_moving_files);
+            options.setMusicTrackList(generateRandomList());
+            mDownloadServiceIntent = new Intent(this, DownloadService.class);
+            mDownloadServiceIntent.putExtra("options", options);
+            startService(mDownloadServiceIntent);
+        } else {
+            Log.d(TAG, "DownloadService is already created and running.");
+        }
+
         //TODO: Should I backup the previous collection?
         //TODO: Should the old files be removed or only add new files? (Add this as feature to be implemented in the future)
     }
@@ -151,12 +192,15 @@ public class ShuffleActivity extends Activity {
         while (currentSizeMegaBytes < targetSizeMegaBytes
                 && targetSizeMegaBytes - currentSizeMegaBytes > 5L
                 && randomMusicTrackList.size() < musicTracks.size()) {
-            int randomSongIndex = randomizer.nextInt(musicTracks.size() - 1);
+            int randomSongIndex = randomizer.nextInt(musicTracks.size());
             if (musicTracks.get(randomSongIndex) != null
                     || musicTracks.get(randomSongIndex).getFirstResource().getSize() != null) {
                 if ((musicTracks.get(randomSongIndex).getFirstResource().getSize() / MEGABYTE) + currentSizeMegaBytes < targetSizeMegaBytes) {
-                    randomMusicTrackList.add(musicTracks.get(randomSongIndex));
-                    currentSizeMegaBytes += musicTracks.get(randomSongIndex).getFirstResource().getSize() / MEGABYTE;
+                    //Randomizer could hand the same value twice
+                    if (!randomMusicTrackList.contains(musicTracks.get(randomSongIndex))) {
+                        randomMusicTrackList.add(musicTracks.get(randomSongIndex));
+                        currentSizeMegaBytes += musicTracks.get(randomSongIndex).getFirstResource().getSize() / MEGABYTE;
+                    }
                 } else {
                     // Collection if full, better to return it as fast as possible.
                     return randomMusicTrackList;
@@ -193,7 +237,7 @@ public class ShuffleActivity extends Activity {
     }
 
 
-    private class ShuffleFilesTask extends AsyncTask<Options, Integer, String> {
+    /*private class ShuffleFilesTask extends AsyncTask<Options, Integer, String> {
         private static final String TAG = "ShuffleFilesTask";
         @Override
         protected String doInBackground(Options... optionses) {
@@ -209,15 +253,17 @@ public class ShuffleActivity extends Activity {
                 if (isCancelled()) break;
             }
 
-            return null;
+            return "Done";
         }
 
         private String getFilename(MusicTrack track) {
             final StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(track.getOriginalTrackNumber())
-                    .append("-")
-                    .append(track.getFirstArtist().toString().replaceAll("[[^a-ö][^0-9][^-_!]]", ""))
-                    .append(" ")
+                    .append(" - ")
+                    .append(track.getFirstArtist().toString().replace("/", ""))
+                    .append(" - ")
+                    .append(track.getAlbum())
+                    .append(" - ")
                     .append(track.getTitle())
                     .append(getExtension(track));
             Log.d(TAG, "filename: " + stringBuilder.toString());
@@ -240,12 +286,14 @@ public class ShuffleActivity extends Activity {
 
         @Override
         protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+            ((TextView)findViewById(R.id.statusText)).setVisibility(View.GONE);
+            Toast.makeText(getApplicationContext(), "Shuffle task ready", Toast.LENGTH_SHORT).show();
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
+        protected void onProgressUpdate(final Integer... values) {
             mProgressBar.setProgress(values[0]);
+            Log.d(TAG, "onProgressUpdate called with value: " + values[0]);
         }
-    }
+    }*/
 }

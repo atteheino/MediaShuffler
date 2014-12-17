@@ -25,14 +25,14 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
-    <Button
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/cancel_button"
-        android:id="@+id/cancelButton"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:singleLine="false" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/shuffle_status_preparing"
+        android:id="@+id/statusText"
+        android:layout_below="@+id/progressBar"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>

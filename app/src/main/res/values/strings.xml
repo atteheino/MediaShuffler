@@ -27,6 +27,8 @@
     <string name="title_activity_shuffle">ShuffleActivity</string>
     <string name="title_shuffling_header">Shuffling the files. Please wait.</string>
     <string name="cancel_button">Cancel</string>
+    <string name="shuffle_status_preparing">Creating list of files...</string>
+    <string name="shuffle_status_moving_files">Transferring files...</string>
 
 
 </resources>
