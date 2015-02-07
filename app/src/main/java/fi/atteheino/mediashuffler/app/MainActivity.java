@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.NumberPicker;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.codeproject.directorychooser.DirectoryChooserDialog;
@@ -24,18 +24,28 @@ public class MainActivity extends Activity {
 
         options = new Options();
 
-        NumberPicker numberPicker = (NumberPicker) findViewById(R.id.sizeOfCollection);
-        if(numberPicker!=null){
-            numberPicker.setMinValue(1);
-            numberPicker.setMaxValue(100);
-            numberPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-                @Override
-                public void onValueChange(NumberPicker numberPicker, int i, int i2) {
-                    selectedSizeOfCollection = i2;
-                    options.setTargetSizeMegaBytes(selectedSizeOfCollection);
-                }
-            });
-        }
+        final TextView sizeOfCollectionText = (TextView) findViewById(R.id.sizeOfCollectionText);
+        SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
+        seekbar.setMax(50);
+        seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                final float gigs = i / (float) 10;
+                sizeOfCollectionText.setText(gigs + "GB");
+                selectedSizeOfCollection = i * 1000;
+                options.setTargetSizeMegaBytes(selectedSizeOfCollection);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         Button sourceButton = (Button) findViewById(R.id.selectSourceButton);
         sourceButton.setOnClickListener(sourceButtonListener);
@@ -80,7 +90,7 @@ public class MainActivity extends Activity {
 
     private View.OnClickListener targetFolderButtonListener = new View.OnClickListener() {
         private String m_chosenDir = "";
-        private boolean m_newFolderEnabled = true;
+        private boolean m_newFolderEnabled = false;
 
         @Override
         public void onClick(View view) {
@@ -126,8 +136,8 @@ public class MainActivity extends Activity {
             }
 
             if (options.getTargetSizeMegaBytes() > 0) {
-                NumberPicker numberPicker = (NumberPicker) findViewById(R.id.sizeOfCollection);
-                numberPicker.setValue(options.getTargetSizeMegaBytes());
+                SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
+                seekbar.setProgress(options.getTargetSizeMegaBytes() / 1000);
             }
 
             if (options.getTargetFolderName() != null) {

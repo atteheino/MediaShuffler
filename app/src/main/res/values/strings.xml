@@ -16,19 +16,20 @@
     <string name="create_demo_failed">Creating of demo device failed, check the log!</string>
     <string name="title_setting_list">Settings</string>
     <string name="title_setting_detail">Setting Detail</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="size_of_collection_activity_main">Select max size (MB) to transfer</string>
+    <string name="title_activity_main">MediaShuffler</string>
+    <string name="size_of_collection_activity_main">Select max size (GB) to transfer:</string>
     <string name="source_path_activity_main">Select source folder</string>
     <string name="target_path_activity_main">Select target folder</string>
     <string name="start_transfer_activity_main">Start transfer</string>
-    <string name="source_activity_main">Source:</string>
-    <string name="title_activity_source_folder_select">SourceFolderSelectActivity</string>
+    <string name="source_activity_main">Select DLNA Server</string>
+    <string name="title_activity_source_folder_select">Select source folder</string>
     <string name="set_as_root">Set as root</string>
-    <string name="title_activity_shuffle">ShuffleActivity</string>
+    <string name="title_activity_shuffle">MediaShuffler</string>
     <string name="title_shuffling_header">Shuffling the files. Please wait.</string>
     <string name="cancel_button">Cancel</string>
     <string name="shuffle_status_preparing">Creating list of files...</string>
     <string name="shuffle_status_moving_files">Transferring files...</string>
-
+    <string name="title_activity_result">MediaShuffler</string>
+    <string name="header_activity_result">Shuflled media (Click to play)</string>
 
 </resources>

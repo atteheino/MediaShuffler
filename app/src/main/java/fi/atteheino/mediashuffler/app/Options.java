@@ -1,7 +1,5 @@
 package fi.atteheino.mediashuffler.app;
 
-import org.teleal.cling.support.model.item.MusicTrack;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -15,7 +13,7 @@ public class Options implements Serializable {
     private String sourceFolderID;
     private String sourceFolderName;
     private String targetFolderName;
-    private List<MusicTrack> musicTrackList;
+    private List<SerializableMusicTrack> musicTrackList;
     private int targetSizeMegaBytes;
 
     public int getTargetSizeMegaBytes() {
@@ -26,11 +24,11 @@ public class Options implements Serializable {
         this.targetSizeMegaBytes = targetSizeMegaBytes;
     }
 
-    public List<MusicTrack> getMusicTrackList() {
+    public List<SerializableMusicTrack> getMusicTrackList() {
         return musicTrackList;
     }
 
-    public void setMusicTrackList(List<MusicTrack> musicTrackList) {
+    public void setMusicTrackList(List<SerializableMusicTrack> musicTrackList) {
         this.musicTrackList = musicTrackList;
     }
 

@@ -10,12 +10,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/ic_launcher_ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
             android:name="fi.atteheino.mediashuffler.app.BrowserActivity"
-            android:label="@string/app_name"></activity>
+            android:label="@string/app_name" />
         <activity
             android:name="fi.atteheino.mediashuffler.app.MainActivity"
             android:label="@string/title_activity_main">
@@ -34,7 +34,7 @@
             android:parentActivityName="fi.atteheino.mediashuffler.app.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="MainActivity" />
+                android:value=".MainActivity" />
         </activity>
 
         <service android:name="org.teleal.cling.android.AndroidUpnpServiceImpl" />
@@ -44,17 +44,26 @@
             the service is only available to this app.
         -->
         <service
-            android:name=".service.DownloadService"
+            android:name="fi.atteheino.mediashuffler.app.service.DownloadService"
             android:exported="false" />
-
 
         <activity
             android:name="fi.atteheino.mediashuffler.app.ShuffleActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_shuffle"
+            android:parentActivityName="fi.atteheino.mediashuffler.app.MainActivity"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name="fi.atteheino.mediashuffler.app.ResultActivity"
+            android:label="@string/title_activity_result"
             android:parentActivityName="fi.atteheino.mediashuffler.app.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="MainActivity" />
+                android:value=".MainActivity" />
         </activity>
     </application>
 

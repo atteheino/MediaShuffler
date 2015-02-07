@@ -1,81 +1,106 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="fi.atteheino.mediashuffler.app.MainActivity">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/background_circle">
 
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:text="@string/size_of_collection_activity_main"
-        android:layout_alignParentTop="true"/>
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            tools:context="fi.atteheino.mediashuffler.app.MainActivity">
 
-    <NumberPicker
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/sizeOfCollection"
-        android:layout_below="@id/textView"
-         />
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/source_activity_main"
-        android:id="@+id/selectSourceButton"
-        android:enabled="true"
-        android:layout_below="@id/sizeOfCollection"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView"
+                android:text="@string/size_of_collection_activity_main"
+                android:layout_alignParentTop="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[Selected source]"
-        android:id="@+id/sourceLabel"
-        android:layout_below="@id/selectSourceButton"
-        />
-<Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/source_path_activity_main"
-        android:id="@+id/selectSourceFolderButton"
-        android:enabled="true"
-        android:layout_below="@id/sourceLabel"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 GB"
+                android:id="@+id/sizeOfCollectionText"
+                android:layout_toRightOf="@+id/textView"
+                android:layout_marginLeft="40dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[Selected path]"
-        android:id="@+id/sourcePathLabel"
-        android:layout_below="@id/selectSourceFolderButton"
-        />
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/seekBar"
+                android:layout_below="@+id/sizeOfCollectionText" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/target_path_activity_main"
-        android:id="@+id/selectTargetFolderButton"
-        android:enabled="true"
-        android:layout_below="@id/sourcePathLabel"
-        />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/source_activity_main"
+                android:id="@+id/selectSourceButton"
+                android:enabled="true"
+                android:background="@drawable/button_selector"
+                android:layout_below="@id/seekBar" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[Selected path]"
-        android:id="@+id/targetPathLabel"
-        android:layout_below="@id/selectTargetFolderButton"
-        />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="[Selected source]"
+                android:id="@+id/sourceLabel"
+                android:layout_below="@id/selectSourceButton" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start_transfer_activity_main"
-        android:id="@+id/startTransferButton"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="34dp" />
-</RelativeLayout>
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/source_path_activity_main"
+                android:id="@+id/selectSourceFolderButton"
+                android:enabled="true"
+                android:background="@drawable/button_selector"
+                android:layout_below="@id/sourceLabel" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="[Selected path]"
+                android:id="@+id/sourcePathLabel"
+                android:layout_below="@id/selectSourceFolderButton" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/target_path_activity_main"
+                android:id="@+id/selectTargetFolderButton"
+                android:enabled="true"
+                android:background="@drawable/button_selector"
+                android:layout_below="@id/sourcePathLabel" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="[Selected path]"
+                android:id="@+id/targetPathLabel"
+                android:layout_below="@id/selectTargetFolderButton" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/start_transfer_activity_main"
+                android:id="@+id/startTransferButton"
+                android:layout_below="@id/targetPathLabel"
+                android:background="@drawable/button_selector"
+                android:layout_marginTop="20px"
+                android:padding="40px"
+                android:layout_centerHorizontal="true" />
+
+        </RelativeLayout>
+
+    </ScrollView>
+</LinearLayout>
+

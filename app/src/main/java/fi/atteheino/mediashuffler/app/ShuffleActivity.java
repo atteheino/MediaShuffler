@@ -1,13 +1,15 @@
 package fi.atteheino.mediashuffler.app;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,19 +34,27 @@ import fi.atteheino.mediashuffler.app.service.DownloadService;
 
 public class ShuffleActivity extends Activity {
 
+    static final String SERVICE_STATUS = "serviceStatus";
+    static final String FILELIST_STATUS = "filelistStatus";
+
     AndroidUpnpService upnpService;
     private Options options;
     private ProgressBar mProgressBar;
     private Vector<MusicTrack> musicTracks = new Vector<MusicTrack>();
     private static final String TAG = "ShuffleActivity";
-    private Intent mDownloadServiceIntent;
+    private boolean mServiceIsRunning;
+    private boolean mFileListGenerated;
+    private DownloadStateReceiver mDownloadStateReceiver;
 
 
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected called from thread " + Thread.currentThread().getId());
-            upnpService = (AndroidUpnpService) service;
-            findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
+            //Only browse the registry if we have not populated the filelists yet.
+            if (mFileListGenerated != true) {
+                upnpService = (AndroidUpnpService) service;
+                findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
+            }
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -73,6 +83,7 @@ public class ShuffleActivity extends Activity {
 
     private Observer myCallbackObserver = new Observer() {
         int countOfBrowsers = 0;
+
         @Override
         public void update(Observable observable, Object o) {
             synchronized (this) {
@@ -94,6 +105,8 @@ public class ShuffleActivity extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            // Set the boolean so that we do not populate the filelist ever again.
+                            mFileListGenerated = true;
                             transferFiles();
                         }
                     });
@@ -108,67 +121,109 @@ public class ShuffleActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shuffle);
 
+        // Check whether we're recreating a previously destroyed instance
+        if (savedInstanceState != null) {
+            mFileListGenerated = savedInstanceState.getBoolean(FILELIST_STATUS);
+            mServiceIsRunning = savedInstanceState.getBoolean(SERVICE_STATUS);
+        }
+
+        // Get the options needed
+        options = (Options) getIntent().getSerializableExtra("Options");
+        //Find the progress bar to update.
+        mProgressBar = (ProgressBar) findViewById((R.id.progressBar));
+
+        //Check if DownloadService is already running and we are getting here from Notification.
+        boolean downloadInProgress = getIntent().getBooleanExtra("STATUS_RUNNING", false);
+        if (!downloadInProgress) {
+            mProgressBar.setIndeterminate(true);
+        } else {
+            mProgressBar.setIndeterminate(false);
+            ((TextView) findViewById(R.id.statusText)).setText(R.string.shuffle_status_moving_files);
+            mFileListGenerated = true;
+        }
+
         getApplicationContext().bindService(
                 new Intent(this, BrowserUpnpService.class),
                 serviceConnection,
                 Context.BIND_AUTO_CREATE
         );
 
-        // Get the options needed
-        options = (Options) getIntent().getSerializableExtra("Options");
-
-        mProgressBar = (ProgressBar) findViewById((R.id.progressBar));
-        mProgressBar.setIndeterminate(true);
+        /*
+    * Creates an intent filter for DownloadStateReceiver that intercepts broadcast Intents
+    */
+        registerBroadcastReceivers();
+        Log.d(TAG, "oCreate called from thread " + Thread.currentThread().getId());
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart called from thread " + Thread.currentThread().getId());
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(SERVICE_STATUS, mServiceIsRunning);
+        outState.putBoolean(FILELIST_STATUS, mFileListGenerated);
+        super.onSaveInstanceState(outState);
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d(TAG, "onRestart called from thread " + Thread.currentThread().getId());
-    }
+    /*
+        * Creates an intent filter for DownloadStateReceiver that intercepts broadcast Intents
+        */
+    private void registerBroadcastReceivers() {
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume called from thread " + Thread.currentThread().getId());
+        // The filter's action is BROADCAST_ACTION
+        IntentFilter mStatusIntentFilter = new IntentFilter(
+                Constants.BROADCAST_ACTION);
+        // Sets the filter's category to DEFAULT
+        mStatusIntentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        // Instantiates a new DownloadStateReceiver
+        mDownloadStateReceiver = new DownloadStateReceiver();
+        // Registers the DownloadStateReceiver and its intent filters
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                mDownloadStateReceiver,
+                mStatusIntentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        unRegisterBroadcastReceivers();
         Log.d(TAG, "onPause called from thread " + Thread.currentThread().getId());
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop called from thread " + Thread.currentThread().getId());
+    protected void onResume() {
+        super.onResume();
+        registerBroadcastReceivers();
+        Log.d(TAG, "onResume called from thread " + Thread.currentThread().getId());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unRegisterBroadcastReceivers();
+
+
         Log.d(TAG, "onDestroy called from thread " + Thread.currentThread().getId());
+    }
+
+    private void unRegisterBroadcastReceivers() {
+        // If the DownloadStateReceiver still exists, unregister it and set it to null
+        if (mDownloadStateReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mDownloadStateReceiver);
+            mDownloadStateReceiver = null;
+        }
     }
 
     public void transferFiles() {
         Log.d(TAG, "transferFiles called from thread " + Thread.currentThread().getId());
         //Let's stop the progressbar and start feeding it correct values.
-        if (mDownloadServiceIntent == null) {
+        if (mServiceIsRunning == false) {
             mProgressBar.setIndeterminate(false);
             mProgressBar.setProgress(0);
             mProgressBar.invalidate();
             ((TextView) findViewById(R.id.statusText)).setText(R.string.shuffle_status_moving_files);
             options.setMusicTrackList(generateRandomList());
-            mDownloadServiceIntent = new Intent(this, DownloadService.class);
-            mDownloadServiceIntent.putExtra("options", options);
-            startService(mDownloadServiceIntent);
+            Intent downloadServiceIntent = new Intent(this, DownloadService.class);
+            downloadServiceIntent.putExtra("options", options);
+            startService(downloadServiceIntent);
+            mServiceIsRunning = true;
         } else {
             Log.d(TAG, "DownloadService is already created and running.");
         }
@@ -177,9 +232,10 @@ public class ShuffleActivity extends Activity {
         //TODO: Should the old files be removed or only add new files? (Add this as feature to be implemented in the future)
     }
 
-    private List<MusicTrack> generateRandomList() {
+    private List<SerializableMusicTrack> generateRandomList() {
 
         List<MusicTrack> randomMusicTrackList = new ArrayList<MusicTrack>();
+
         final long targetSizeMegaBytes = options.getTargetSizeMegaBytes();
         final long MEGABYTE = 1024L * 1024L;
         long currentSizeMegaBytes = 0;
@@ -203,11 +259,26 @@ public class ShuffleActivity extends Activity {
                     }
                 } else {
                     // Collection if full, better to return it as fast as possible.
-                    return randomMusicTrackList;
+                    return convertToSerializableMusicTracks(randomMusicTrackList);
                 }
             }
         }
-        return randomMusicTrackList;
+        return convertToSerializableMusicTracks(randomMusicTrackList);
+    }
+
+    private List<SerializableMusicTrack> convertToSerializableMusicTracks(List<MusicTrack> randomMusicTrackList) {
+        List<SerializableMusicTrack> serializableRandomMusicTrackList = new ArrayList<SerializableMusicTrack>();
+        for (MusicTrack track : randomMusicTrackList) {
+            SerializableMusicTrack serializableMusicTrack = new SerializableMusicTrack();
+            serializableMusicTrack.setAlbum(track.getAlbum());
+            serializableMusicTrack.setFirstArtist(track.getFirstArtist() == null ? "" : track.getFirstArtist().toString());
+            serializableMusicTrack.setMimetype(track.getFirstResource().getProtocolInfo().getContentFormatMimeType() == null ? "" : track.getFirstResource().getProtocolInfo().getContentFormatMimeType().toString());
+            serializableMusicTrack.setOriginalTrackNumber(track.getOriginalTrackNumber() == null ? 0 : track.getOriginalTrackNumber());
+            serializableMusicTrack.setTitle(track.getTitle());
+            serializableMusicTrack.setURL(track.getFirstResource().getValue());
+            serializableRandomMusicTrackList.add(serializableMusicTrack);
+        }
+        return serializableRandomMusicTrackList;
     }
 
     @Override
@@ -229,13 +300,30 @@ public class ShuffleActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void onCancelAdd() {
-        if (mShuffleTask != null && mShuffleTask.getStatus() == AsyncTask.Status.RUNNING) {
-            mShuffleTask.cancel(true);
-            mShuffleTask = null;
-        }
+    private void displayResults() {
+        Intent resultIntent = new Intent(this, ResultActivity.class);
+        resultIntent.putExtra("Options", options);
+        startActivity(resultIntent);
     }
 
+
+    // Broadcast receiver for receiving status updates from the IntentService
+    private class DownloadStateReceiver extends BroadcastReceiver {
+        // Prevents instantiation
+        private DownloadStateReceiver() {
+        }
+
+        // Called when the BroadcastReceiver gets an Intent it's registered to receive
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mProgressBar = (ProgressBar) findViewById((R.id.progressBar));
+            mProgressBar.setProgress(intent.getIntExtra(Constants.EXTENDED_DATA_STATUS, 0));
+            Log.d(TAG, "onReceive called with value: " + intent.getIntExtra(Constants.EXTENDED_DATA_STATUS, 0));
+            if (intent.getIntExtra(Constants.EXTENDED_DATA_STATUS, 0) == 100) {
+                displayResults();
+            }
+        }
+    }
 
     /*private class ShuffleFilesTask extends AsyncTask<Options, Integer, String> {
         private static final String TAG = "ShuffleFilesTask";
