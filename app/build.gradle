@@ -1,19 +1,19 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 19
+        minSdkVersion 15
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
     buildTypes {
         release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -29,6 +29,8 @@ dependencies {
     compile group: 'org.teleal.cling', name: 'cling-core', version: '1.0.5'
     compile group: 'org.teleal.cling', name: 'cling-support', version: '1.0.5'
 
-    compile 'com.android.support:support-v4:19.0.0'
-    compile 'com.android.support:appcompat-v7:19.+'
+    //compile 'com.android.support:support-v4:19.0.0'
+    //compile 'com.android.support:appcompat-v7:19.+'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.0.0'
 }
