@@ -1,7 +1,6 @@
 package fi.atteheino.mediashuffler.app;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -35,8 +34,9 @@ public class ResultActivity extends Activity {
 
     public void playMedia(Uri file) {
         Intent intent = new Intent();
-        ComponentName comp = new ComponentName("com.android.music", "com.android.music.MediaPlaybackActivity");
+        /*ComponentName comp = new ComponentName("com.android.music", "com.android.music.MediaPlaybackActivity");
         intent.setComponent(comp);
+        */
         intent.setAction(android.content.Intent.ACTION_VIEW);
         intent.setDataAndType(file, "audio/*");
         startActivity(intent);
