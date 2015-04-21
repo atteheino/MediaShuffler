@@ -69,14 +69,15 @@ public class SerializableMusicTrack implements Serializable {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(getOriginalTrackNumber())
                 .append(" - ")
-                .append(getFirstArtist().replace("/", ""))
+                .append(getFirstArtist())
                 .append(" - ")
-                .append(getAlbum().replace("/", ""))
+                .append(getAlbum())
                 .append(" - ")
-                .append(getTitle().replace("/", ""))
+                .append(getTitle())
                 .append(getExtension());
-        Log.d(TAG, "filename: " + stringBuilder.toString());
-        return stringBuilder.toString();
+        final String filename = stringBuilder.toString().replace("/", "").replace("?", "");
+        Log.d(TAG, "filename: " + filename);
+        return filename;
     }
 
     private String getExtension() {
