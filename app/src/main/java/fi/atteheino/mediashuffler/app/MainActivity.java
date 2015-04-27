@@ -10,11 +10,9 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.codeproject.directorychooser.DirectoryChooserDialog;
-
 
 public class MainActivity extends Activity {
-    private int selectedSizeOfCollection=0;
+    private int selectedSizeOfCollection = 0;
     private Options options;
 
     @Override
@@ -94,7 +92,12 @@ public class MainActivity extends Activity {
 
         @Override
         public void onClick(View view) {
-            // Create DirectoryChooserDialog and register a callback
+
+            Intent targetFolderSelectActivity = new Intent(getApplicationContext(), TargetFolderSelectActivity.class);
+            targetFolderSelectActivity.putExtra("Options", options);
+            startActivity(targetFolderSelectActivity);
+
+            /*// Create DirectoryChooserDialog and register a callback
             DirectoryChooserDialog directoryChooserDialog =
                     new DirectoryChooserDialog(MainActivity.this,
                             new DirectoryChooserDialog.ChosenDirectoryListener() {
@@ -110,7 +113,7 @@ public class MainActivity extends Activity {
             directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
             // Load directory chooser dialog for initial 'm_chosenDir' directory.
             // The registered callback will be called upon final directory selection.
-            directoryChooserDialog.chooseDirectory(m_chosenDir);
+            directoryChooserDialog.chooseDirectory(m_chosenDir);*/
         }
     };
 
@@ -118,14 +121,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(getIntent()!=null) {
+        if (getIntent() != null) {
 
 
             if (getIntent().getSerializableExtra("Options") != null) {
                 options = (Options) getIntent().getSerializableExtra("Options");
             }
 
-            if (options.getDLNADevice()!=null) {
+            if (options.getDLNADevice() != null) {
                 TextView sourceLabel = (TextView) findViewById(R.id.sourceLabel);
                 sourceLabel.setText(options.getDLNADevice() + "(" + options.getDLNADeviceUDN() + ")");
             }
@@ -154,7 +157,7 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
