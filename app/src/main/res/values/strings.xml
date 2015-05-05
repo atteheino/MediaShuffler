@@ -32,5 +32,6 @@
     <string name="title_activity_result">MediaShuffler</string>
     <string name="header_activity_result">Shuflled media (Click to play)</string>
     <string name="title_activity_target_folder_select">Select Target Directory</string>
+    <string name="folder_select_help_text">Enter folder by clicking - Select with long press</string>
 
 </resources>

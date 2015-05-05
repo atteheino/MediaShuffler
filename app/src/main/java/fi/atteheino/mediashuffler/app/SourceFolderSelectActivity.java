@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.teleal.cling.android.AndroidUpnpService;
 import org.teleal.cling.controlpoint.ActionCallback;
@@ -40,6 +42,7 @@ public class SourceFolderSelectActivity extends Activity {
     FolderSelectArrayAdapter adapter;
     private String level = "0";
     private Options options;
+    private static final String IS_FIRST_LAUNCH = "is_first_SourceFolderSelectActivity";
 
 
     ServiceConnection serviceConnection = new ServiceConnection() {
@@ -130,6 +133,19 @@ public class SourceFolderSelectActivity extends Activity {
         listView.setOnItemClickListener(mMessageClickedHandler);
         listView.setOnItemLongClickListener(itemLongClickListener);
 
+        //Let's see if we need to show the user some help on the first run.
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, 0);
+        boolean isFirst = settings.getBoolean(IS_FIRST_LAUNCH, true);
+        if (isFirst) {
+            settings.edit().putBoolean(IS_FIRST_LAUNCH, false).commit();
+            showTips();
+        }
+
+    }
+
+    private void showTips() {
+        Toast tipToast = Toast.makeText(getApplicationContext(), R.string.folder_select_help_text, Toast.LENGTH_LONG);
+        tipToast.show();
     }
 
     // Create a message handling object as an anonymous class.

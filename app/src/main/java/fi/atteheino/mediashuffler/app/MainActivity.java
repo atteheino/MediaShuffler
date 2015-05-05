@@ -2,6 +2,7 @@ package fi.atteheino.mediashuffler.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
     private int selectedSizeOfCollection = 0;
     private Options options;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class MainActivity extends Activity {
 
             }
         });
+
 
         Button sourceButton = (Button) findViewById(R.id.selectSourceButton);
         sourceButton.setOnClickListener(sourceButtonListener);
@@ -87,8 +90,6 @@ public class MainActivity extends Activity {
     };
 
     private View.OnClickListener targetFolderButtonListener = new View.OnClickListener() {
-        private String m_chosenDir = "";
-        private boolean m_newFolderEnabled = false;
 
         @Override
         public void onClick(View view) {
@@ -97,23 +98,7 @@ public class MainActivity extends Activity {
             targetFolderSelectActivity.putExtra("Options", options);
             startActivity(targetFolderSelectActivity);
 
-            /*// Create DirectoryChooserDialog and register a callback
-            DirectoryChooserDialog directoryChooserDialog =
-                    new DirectoryChooserDialog(MainActivity.this,
-                            new DirectoryChooserDialog.ChosenDirectoryListener() {
-                                @Override
-                                public void onChosenDir(String chosenDir) {
-                                    m_chosenDir = chosenDir;
-                                    options.setTargetFolderName(chosenDir);
-                                    setTargetFolderLabel(chosenDir);
-                                }
-                            }
-                    );
-            // Toggle new folder button enabling
-            directoryChooserDialog.setNewFolderEnabled(m_newFolderEnabled);
-            // Load directory chooser dialog for initial 'm_chosenDir' directory.
-            // The registered callback will be called upon final directory selection.
-            directoryChooserDialog.chooseDirectory(m_chosenDir);*/
+
         }
     };
 
@@ -121,32 +106,83 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // If we are returning to this activity, let's load settings from Intent
         if (getIntent() != null) {
-
 
             if (getIntent().getSerializableExtra("Options") != null) {
                 options = (Options) getIntent().getSerializableExtra("Options");
             }
 
-            if (options.getDLNADevice() != null) {
-                TextView sourceLabel = (TextView) findViewById(R.id.sourceLabel);
-                sourceLabel.setText(options.getDLNADevice() + "(" + options.getDLNADeviceUDN() + ")");
+        } else //This is first run. Let's see if we have pre saved settings.
+        {
+            //Get shared preferences
+            SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, 0);
+            boolean isMediaserverSet = settings.getBoolean(Constants.MEDIASERVER_SET, false);
+            boolean isSourceSet = settings.getBoolean(Constants.SOURCE_SET, false);
+            boolean isTargetSet = settings.getBoolean(Constants.TARGET_SET, false);
+
+            if (isMediaserverSet) {
+                options.setDLNADevice(settings.getString(Constants.MEDIASERVER_NAME, ""));
+                options.setDLNADeviceUDN(settings.getString(Constants.MEDIASERVER_UDN, ""));
             }
 
-            if (options.getSourceFolderName() != null && options.getSourceFolderID() != null) {
-                TextView sourceFolderLabel = (TextView) findViewById(R.id.sourcePathLabel);
-                sourceFolderLabel.setText(options.getSourceFolderName() + "(" + options.getSourceFolderID() + ")");
+            if (isSourceSet) {
+                options.setSourceFolderName(settings.getString(Constants.SOURCE_FOLDER_NAME, ""));
+                options.setSourceFolderID(settings.getString(Constants.SOURCE_FOLDER_ID, ""));
             }
 
-            if (options.getTargetSizeMegaBytes() > 0) {
-                SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
-                seekbar.setProgress(options.getTargetSizeMegaBytes() / 1000);
+            if (isTargetSet) {
+                options.setTargetFolderName(settings.getString(Constants.TARGET_FOLDER, ""));
             }
 
-            if (options.getTargetFolderName() != null) {
-                TextView targetFolderLabel = (TextView) findViewById(R.id.targetPathLabel);
-                targetFolderLabel.setText(options.getTargetFolderName());
-            }
+        }
+        //Let's show the selected values to user.
+        setDisplayValuesForOptions();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        if (options.getDLNADevice() != null && options.getDLNADeviceUDN() != null) {
+            editor.putBoolean(Constants.MEDIASERVER_SET, true);
+            editor.putString(Constants.MEDIASERVER_NAME, options.getDLNADevice());
+            editor.putString(Constants.MEDIASERVER_UDN, options.getDLNADeviceUDN());
+            editor.apply();
+        }
+        if (options.getSourceFolderID() != null && options.getSourceFolderName() != null) {
+            editor.putBoolean(Constants.SOURCE_SET, true);
+            editor.putString(Constants.SOURCE_FOLDER_NAME, options.getSourceFolderName());
+            editor.putString(Constants.SOURCE_FOLDER_ID, options.getSourceFolderID());
+            editor.apply();
+        }
+        if (options.getTargetFolderName() != null) {
+            editor.putBoolean(Constants.TARGET_SET, true);
+            editor.putString(Constants.TARGET_FOLDER, options.getTargetFolderName());
+            editor.apply();
+        }
+    }
+
+    private void setDisplayValuesForOptions() {
+        if (options.getDLNADevice() != null) {
+            TextView sourceLabel = (TextView) findViewById(R.id.sourceLabel);
+            sourceLabel.setText(options.getDLNADevice() + "(" + options.getDLNADeviceUDN() + ")");
+        }
+
+        if (options.getSourceFolderName() != null && options.getSourceFolderID() != null) {
+            TextView sourceFolderLabel = (TextView) findViewById(R.id.sourcePathLabel);
+            sourceFolderLabel.setText(options.getSourceFolderName() + "(" + options.getSourceFolderID() + ")");
+        }
+
+        if (options.getTargetSizeMegaBytes() > 0) {
+            SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
+            seekbar.setProgress(options.getTargetSizeMegaBytes() / 1000);
+        }
+
+        if (options.getTargetFolderName() != null) {
+            TextView targetFolderLabel = (TextView) findViewById(R.id.targetPathLabel);
+            targetFolderLabel.setText(options.getTargetFolderName());
         }
     }
 

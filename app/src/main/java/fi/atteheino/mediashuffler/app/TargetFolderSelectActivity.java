@@ -2,6 +2,7 @@ package fi.atteheino.mediashuffler.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -11,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ public class TargetFolderSelectActivity extends Activity {
     private List<String> mFolders;
     private ArrayAdapter<String> mAdapter;
     private final String sdRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+    private static final String IS_FIRST_LAUNCH = "is_first_TargetFolderSelectActivity";
 
     //Return root directory or currently selected directory
     public String getmCurrentRootFolder() {
@@ -52,6 +56,21 @@ public class TargetFolderSelectActivity extends Activity {
         listView.setOnItemClickListener(mMessageClickedHandler);
         listView.setOnItemLongClickListener(itemLongClickListener);
 
+        TextView pathView = (TextView) findViewById(R.id.pathView);
+        pathView.setText(getmCurrentRootFolder());
+
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, 0);
+        boolean isFirst = settings.getBoolean(IS_FIRST_LAUNCH, true);
+        if (isFirst) {
+            settings.edit().putBoolean(IS_FIRST_LAUNCH, false).commit();
+            showTips();
+        }
+
+    }
+
+    private void showTips() {
+        Toast tipToast = Toast.makeText(getApplicationContext(), R.string.folder_select_help_text, Toast.LENGTH_LONG);
+        tipToast.show();
     }
 
 
@@ -70,6 +89,9 @@ public class TargetFolderSelectActivity extends Activity {
         mFolders.clear();
         mFolders.addAll(getFolders(getmCurrentRootFolder()));
         mAdapter.notifyDataSetChanged();
+        //Update path on display
+        TextView pathView = (TextView) findViewById(R.id.pathView);
+        pathView.setText(getmCurrentRootFolder());
     }
 
     private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {

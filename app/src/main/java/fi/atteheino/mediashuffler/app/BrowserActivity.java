@@ -84,6 +84,7 @@ public class BrowserActivity extends ListActivity {
         DeviceDisplay selectedDevice = (DeviceDisplay)l.getItemAtPosition(position);
         options.setDLNADevice(selectedDevice.toString());
         options.setDLNADeviceUDN(selectedDevice.device.getIdentity().getUdn().getIdentifierString());
+
         Intent i = new Intent(this, MainActivity.class);
         i.putExtra("Options", options);
         startActivity(i);
