@@ -43,9 +43,9 @@ public class DownloadService extends IntentService {
         mNotifyManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mBuilder = new NotificationCompat.Builder(this);
-        mBuilder.setContentTitle("MediaShuffler")
-                .setContentText("Download in progress")
-                .setSmallIcon(R.drawable.appicon)
+        mBuilder.setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.service_download_in_progress))
+                .setSmallIcon(R.drawable.ic_launcher_ic_launcher)
                 .setAutoCancel(true);
         Intent shuffleIntent = new Intent(this, ShuffleActivity.class);
         shuffleIntent.putExtra("Options", options);

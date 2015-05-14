@@ -20,9 +20,13 @@ import org.teleal.cling.android.AndroidUpnpService;
 import org.teleal.cling.controlpoint.ActionCallback;
 import org.teleal.cling.model.action.ActionInvocation;
 import org.teleal.cling.model.message.UpnpResponse;
+import org.teleal.cling.model.message.header.UDNHeader;
 import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.RemoteService;
 import org.teleal.cling.model.meta.Service;
+import org.teleal.cling.model.types.UDN;
+import org.teleal.cling.registry.DefaultRegistryListener;
+import org.teleal.cling.registry.Registry;
 import org.teleal.cling.support.contentdirectory.callback.Browse;
 import org.teleal.cling.support.model.BrowseFlag;
 import org.teleal.cling.support.model.DIDLContent;
@@ -40,6 +44,8 @@ public class SourceFolderSelectActivity extends Activity {
 
     AndroidUpnpService upnpService;
     FolderSelectArrayAdapter adapter;
+    private ListFoldersRegistryListener mListener = new ListFoldersRegistryListener();
+
     private String level = "0";
     private Options options;
     private static final String IS_FIRST_LAUNCH = "is_first_SourceFolderSelectActivity";
@@ -48,6 +54,10 @@ public class SourceFolderSelectActivity extends Activity {
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             upnpService = (AndroidUpnpService) service;
+            upnpService.getRegistry().addListener(mListener);
+            if (upnpService.getRegistry().getRemoteDevices().size() == 0 && options.getDLNADeviceUDN() != null) {
+                upnpService.getControlPoint().search(new UDNHeader(new UDN(options.getDLNADeviceUDN())));
+            }
             findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
         }
         public void onServiceDisconnected(ComponentName className) {
@@ -143,6 +153,12 @@ public class SourceFolderSelectActivity extends Activity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getApplicationContext().unbindService(serviceConnection);
+    }
+
     private void showTips() {
         Toast tipToast = Toast.makeText(getApplicationContext(), R.string.folder_select_help_text, Toast.LENGTH_LONG);
         tipToast.show();
@@ -207,4 +223,10 @@ public class SourceFolderSelectActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    private class ListFoldersRegistryListener extends DefaultRegistryListener {
+        @Override
+        public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+            findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
+        }
+    }
 }

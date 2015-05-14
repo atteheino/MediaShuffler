@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">MediaShuffler</string>
+    <string name="app_name">Media Shuffle</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="search_lan">Search LAN</string>
@@ -16,7 +16,7 @@
     <string name="create_demo_failed">Creating of demo device failed, check the log!</string>
     <string name="title_setting_list">Settings</string>
     <string name="title_setting_detail">Setting Detail</string>
-    <string name="title_activity_main">MediaShuffler</string>
+    <string name="title_activity_main">Media Shuffle</string>
     <string name="size_of_collection_activity_main">Select max size (GB) to transfer:</string>
     <string name="source_path_activity_main">Select source folder</string>
     <string name="target_path_activity_main">Select target folder</string>
@@ -24,14 +24,15 @@
     <string name="source_activity_main">Select DLNA Server</string>
     <string name="title_activity_source_folder_select">Select source folder</string>
     <string name="set_as_root">Set as root</string>
-    <string name="title_activity_shuffle">MediaShuffler</string>
+    <string name="title_activity_shuffle">Media Shuffle</string>
     <string name="title_shuffling_header">Shuffling the files. Please wait.</string>
     <string name="cancel_button">Cancel</string>
     <string name="shuffle_status_preparing">Creating list of files...</string>
     <string name="shuffle_status_moving_files">Transferring files...</string>
-    <string name="title_activity_result">MediaShuffler</string>
-    <string name="header_activity_result">Shuflled media (Click to play)</string>
+    <string name="title_activity_result">Media Shuffle</string>
+    <string name="header_activity_result">Shuffled media (Click to play)</string>
     <string name="title_activity_target_folder_select">Select Target Directory</string>
     <string name="folder_select_help_text">Enter folder by clicking - Select with long press</string>
+    <string name="service_download_in_progress">Download in progress</string>
 
 </resources>

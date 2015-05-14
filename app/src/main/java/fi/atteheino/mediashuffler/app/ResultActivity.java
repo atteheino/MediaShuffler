@@ -52,10 +52,9 @@ public class ResultActivity extends Activity {
     };
 
     public void onBackPressed() {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        startActivity(intent);
+        Intent i = new Intent(this, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
     }
 
     @Override

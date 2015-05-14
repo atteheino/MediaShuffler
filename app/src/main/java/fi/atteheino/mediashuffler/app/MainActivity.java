@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
 
         final TextView sizeOfCollectionText = (TextView) findViewById(R.id.sizeOfCollectionText);
         SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
-        seekbar.setMax(50);
+        seekbar.setMax(30);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -111,28 +111,28 @@ public class MainActivity extends Activity {
 
             if (getIntent().getSerializableExtra("Options") != null) {
                 options = (Options) getIntent().getSerializableExtra("Options");
-            }
+            } else //This is first run. Let's see if we have pre saved settings.
+            {
+                //Get shared preferences
+                SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, 0);
+                boolean isMediaserverSet = settings.getBoolean(Constants.MEDIASERVER_SET, false);
+                boolean isSourceSet = settings.getBoolean(Constants.SOURCE_SET, false);
+                boolean isTargetSet = settings.getBoolean(Constants.TARGET_SET, false);
 
-        } else //This is first run. Let's see if we have pre saved settings.
-        {
-            //Get shared preferences
-            SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_FILE, 0);
-            boolean isMediaserverSet = settings.getBoolean(Constants.MEDIASERVER_SET, false);
-            boolean isSourceSet = settings.getBoolean(Constants.SOURCE_SET, false);
-            boolean isTargetSet = settings.getBoolean(Constants.TARGET_SET, false);
+                if (isMediaserverSet) {
+                    options.setDLNADevice(settings.getString(Constants.MEDIASERVER_NAME, ""));
+                    options.setDLNADeviceUDN(settings.getString(Constants.MEDIASERVER_UDN, ""));
+                }
 
-            if (isMediaserverSet) {
-                options.setDLNADevice(settings.getString(Constants.MEDIASERVER_NAME, ""));
-                options.setDLNADeviceUDN(settings.getString(Constants.MEDIASERVER_UDN, ""));
-            }
+                if (isSourceSet) {
+                    options.setSourceFolderName(settings.getString(Constants.SOURCE_FOLDER_NAME, ""));
+                    options.setSourceFolderID(settings.getString(Constants.SOURCE_FOLDER_ID, ""));
+                }
 
-            if (isSourceSet) {
-                options.setSourceFolderName(settings.getString(Constants.SOURCE_FOLDER_NAME, ""));
-                options.setSourceFolderID(settings.getString(Constants.SOURCE_FOLDER_ID, ""));
-            }
+                if (isTargetSet) {
+                    options.setTargetFolderName(settings.getString(Constants.TARGET_FOLDER, ""));
+                }
 
-            if (isTargetSet) {
-                options.setTargetFolderName(settings.getString(Constants.TARGET_FOLDER, ""));
             }
 
         }
@@ -167,12 +167,12 @@ public class MainActivity extends Activity {
     private void setDisplayValuesForOptions() {
         if (options.getDLNADevice() != null) {
             TextView sourceLabel = (TextView) findViewById(R.id.sourceLabel);
-            sourceLabel.setText(options.getDLNADevice() + "(" + options.getDLNADeviceUDN() + ")");
+            sourceLabel.setText(options.getDLNADevice());
         }
 
         if (options.getSourceFolderName() != null && options.getSourceFolderID() != null) {
             TextView sourceFolderLabel = (TextView) findViewById(R.id.sourcePathLabel);
-            sourceFolderLabel.setText(options.getSourceFolderName() + "(" + options.getSourceFolderID() + ")");
+            sourceFolderLabel.setText(options.getSourceFolderName());
         }
 
         if (options.getTargetSizeMegaBytes() > 0) {
