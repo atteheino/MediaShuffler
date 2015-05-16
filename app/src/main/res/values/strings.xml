@@ -31,16 +31,27 @@
     <string name="service_download_in_progress">Download in progress</string>
 
     <!-- About Activity -->
-    <string name="about_activity_header">Media Shuffler</string>
+    <string name="about_activity_header">Media Shuffle</string>
     <string name="about_activity_body">
-        The Media Shuffle app has been created by Atte Heino.
-        The application contains LGPL software such as Cling DLNA Java library developed by 4th Line .org.
-        You can find the Library and licence from http://4thline.org/projects/cling/
-
-        The developer of the application takes no responsibility of using the application and possible
-        damage caused by usage of the application. Using the application is on the users own risk.
-
+        The Media Shuffle app has been created by Atte Heino.\n\n
+        The application contains LGPL software such as Cling DLNA Java library developed by 4th Line .org.\n
+        You can find the Library and licence from http://4thline.org/projects/cling/\n\n
         Happy Shuffling!
+    </string>
+    <string name="eula">
+        Copyright 2015 Atte Heino\n\n
+
+Licensed under the Apache License, Version 2.0 (the "License”);\n
+you may not use this file except in compliance with the License.\n
+You may obtain a copy of the License at\n\n
+
+    http://www.apache.org/licenses/LICENSE-2.0\n
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+See the License for the specific language governing permissions and
+limitations under the License.
     </string>
 
     <!-- Activity titles -->
