@@ -1,6 +1,8 @@
 package fi.atteheino.mediashuffler.app;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ public class ResultActivity extends Activity {
 
     private ArrayAdapter<SerializableMusicTrack> arrayAdapter;
     private Options options;
+    private NotificationManager mNotifyManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,11 @@ public class ResultActivity extends Activity {
         ListView resultListView = (ListView) findViewById(R.id.resultListView);
         resultListView.setAdapter(arrayAdapter);
         resultListView.setOnItemClickListener(resultListOnClickListener);
+
+        // Hide the notification if user hasn't clicked it
+        mNotifyManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotifyManager.cancelAll();
     }
 
     public void playMedia(Uri file) {
