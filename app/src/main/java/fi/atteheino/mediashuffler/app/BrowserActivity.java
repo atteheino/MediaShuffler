@@ -1,3 +1,18 @@
+/*
+ * Copyright 2015 Atte Heino
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package fi.atteheino.mediashuffler.app;
 
 import android.app.ListActivity;
@@ -74,14 +89,14 @@ public class BrowserActivity extends ListActivity {
                 Context.BIND_AUTO_CREATE
         );
 
-        options = (Options)getIntent().getSerializableExtra("Options");
+        options = (Options) getIntent().getSerializableExtra("Options");
 
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        DeviceDisplay selectedDevice = (DeviceDisplay)l.getItemAtPosition(position);
+        DeviceDisplay selectedDevice = (DeviceDisplay) l.getItemAtPosition(position);
         options.setDLNADevice(selectedDevice.toString());
         options.setDLNADeviceUDN(selectedDevice.device.getIdentity().getUdn().getIdentifierString());
 
@@ -101,7 +116,7 @@ public class BrowserActivity extends ListActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.main, menu);
         menu.add(0, 0, 0, R.string.search_lan).setIcon(android.R.drawable.ic_menu_search);
@@ -157,7 +172,6 @@ public class BrowserActivity extends ListActivity {
         upnpService.getRegistry().removeAllRemoteDevices();
         upnpService.getControlPoint().search();
     }
-
 
 
     protected class BrowseRegistryListener extends DefaultRegistryListener {
@@ -277,6 +291,7 @@ public class BrowserActivity extends ListActivity {
             return device.isFullyHydrated() ? name : name + " *";
         }
     }
+
     static final Comparator<DeviceDisplay> DISPLAY_COMPARATOR =
             new Comparator<DeviceDisplay>() {
                 public int compare(DeviceDisplay a, DeviceDisplay b) {
