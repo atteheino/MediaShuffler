@@ -39,7 +39,7 @@ Hyviä käyttöhetkiä!</string>
     <string name="title_activity_target_folder_select">Valitse kohdehakemisto</string>
     <string name="title_setting_detail">Tarkat asetukset</string>
     <string name="title_setting_list">Asetukset</string>
-    <string name="title_shuffling_header">Siirretään kokoelman tiedostoja. Ole hyvä ja odoita.</string>
+    <string name="title_shuffling_header">Siirretään kokoelman tiedostoja. Ole hyvä ja odota.</string>
     <!-- Main Activity -->
     <string name="selected_source_label">[Mediapalvelinta ei ole asetettu...]</string>
     <string name="selected_source_path_label">[Lähdehakemistoa ei ole asetettu...]</string>

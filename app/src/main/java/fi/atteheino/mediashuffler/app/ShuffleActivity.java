@@ -32,8 +32,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.teleal.cling.android.AndroidUpnpService;
+import org.teleal.cling.model.message.header.UDNHeader;
 import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.RemoteService;
+import org.teleal.cling.model.types.UDN;
+import org.teleal.cling.registry.DefaultRegistryListener;
+import org.teleal.cling.registry.Registry;
 import org.teleal.cling.support.model.item.MusicTrack;
 
 import java.util.ArrayList;
@@ -53,6 +57,8 @@ public class ShuffleActivity extends Activity {
     static final String FILELIST_STATUS = "filelistStatus";
 
     AndroidUpnpService upnpService;
+    private BasicRegistryListener mListener = new BasicRegistryListener();
+
     private Options options;
     private ProgressBar mProgressBar;
     private Vector<MusicTrack> musicTracks = new Vector<MusicTrack>();
@@ -68,6 +74,10 @@ public class ShuffleActivity extends Activity {
             //Only browse the registry if we have not populated the filelists yet.
             if (mFileListGenerated != true) {
                 upnpService = (AndroidUpnpService) service;
+                upnpService.getRegistry().addListener(mListener);
+                if (upnpService.getRegistry().getRemoteDevices().size() == 0 && options.getDLNADeviceUDN() != null) {
+                    upnpService.getControlPoint().search(new UDNHeader(new UDN(options.getDLNADeviceUDN())));
+                }
                 findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
             }
         }
@@ -340,63 +350,10 @@ public class ShuffleActivity extends Activity {
         }
     }
 
-    /*private class ShuffleFilesTask extends AsyncTask<Options, Integer, String> {
-        private static final String TAG = "ShuffleFilesTask";
+    private class BasicRegistryListener extends DefaultRegistryListener {
         @Override
-        protected String doInBackground(Options... optionses) {
-            final List<MusicTrack> randomMusicTrackList = optionses[0].getMusicTrackList();
-            int counter = 0;
-            for (MusicTrack track : randomMusicTrackList) {
-                Downloader.downloadFile(track.getFirstResource().getValue(),
-                        optionses[0].getTargetFolderName(),
-                        getFilename(track));
-                counter++;
-                publishProgress((counter / randomMusicTrackList.size()) * 100);
-                // Escape early if cancel() is called
-                if (isCancelled()) break;
-            }
-
-            return "Done";
+        public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+            findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
         }
-
-        private String getFilename(MusicTrack track) {
-            final StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(track.getOriginalTrackNumber())
-                    .append(" - ")
-                    .append(track.getFirstArtist().toString().replace("/", ""))
-                    .append(" - ")
-                    .append(track.getAlbum())
-                    .append(" - ")
-                    .append(track.getTitle())
-                    .append(getExtension(track));
-            Log.d(TAG, "filename: " + stringBuilder.toString());
-            return stringBuilder.toString();
-        }
-
-        private String getExtension(MusicTrack track) {
-
-            final String mimetype = track.getFirstResource().getProtocolInfo().getContentFormatMimeType().toString();
-            if (mimetype.equalsIgnoreCase("audio/mpeg")) {
-                return ".mp3";
-            } else if (mimetype.equalsIgnoreCase("audio/ogg")) {
-                return ".ogg";
-            } else if (mimetype.equalsIgnoreCase("audio/mp4")) {
-                return ".mp4";
-            } else if (mimetype.equalsIgnoreCase("audio/vnd.wav")) {
-                return ".wav";
-            } else return ".mp3";
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            ((TextView)findViewById(R.id.statusText)).setVisibility(View.GONE);
-            Toast.makeText(getApplicationContext(), "Shuffle task ready", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        protected void onProgressUpdate(final Integer... values) {
-            mProgressBar.setProgress(values[0]);
-            Log.d(TAG, "onProgressUpdate called with value: " + values[0]);
-        }
-    }*/
+    }
 }
