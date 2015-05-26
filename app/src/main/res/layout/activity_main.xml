@@ -63,12 +63,20 @@
                 android:background="@drawable/button_selector"
                 android:layout_below="@id/seekBar" />
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/sourceArrowImageView"
+                android:layout_below="@id/selectSourceButton"
+                android:src="@drawable/custom_arrow" />
+
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="[Selected source]"
+                android:text="@string/selected_source_label"
                 android:id="@+id/sourceLabel"
-                android:layout_below="@id/selectSourceButton" />
+                android:layout_below="@id/selectSourceButton"
+                android:layout_toRightOf="@id/sourceArrowImageView" />
 
             <Button
                 android:layout_width="fill_parent"
@@ -77,14 +85,22 @@
                 android:id="@+id/selectSourceFolderButton"
                 android:enabled="true"
                 android:background="@drawable/button_selector"
-                android:layout_below="@id/sourceLabel" />
+                android:layout_below="@id/sourceArrowImageView" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/sourcePathArrowImageView"
+                android:layout_below="@id/selectSourceFolderButton"
+                android:src="@drawable/custom_arrow" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="[Selected path]"
+                android:text="@string/selected_source_path_label"
                 android:id="@+id/sourcePathLabel"
-                android:layout_below="@id/selectSourceFolderButton" />
+                android:layout_below="@id/selectSourceFolderButton"
+                android:layout_toRightOf="@id/sourcePathArrowImageView" />
 
             <Button
                 android:layout_width="fill_parent"
@@ -93,14 +109,22 @@
                 android:id="@+id/selectTargetFolderButton"
                 android:enabled="true"
                 android:background="@drawable/button_selector"
-                android:layout_below="@id/sourcePathLabel" />
+                android:layout_below="@id/sourcePathArrowImageView" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/targetPathArrowImageView"
+                android:layout_below="@id/selectTargetFolderButton"
+                android:src="@drawable/custom_arrow" />
 
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="[Selected path]"
+                android:text="@string/selected_target_path_label"
                 android:id="@+id/targetPathLabel"
-                android:layout_below="@id/selectTargetFolderButton" />
+                android:layout_below="@id/selectTargetFolderButton"
+                android:layout_toRightOf="@id/targetPathArrowImageView" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -116,5 +140,6 @@
         </RelativeLayout>
 
     </ScrollView>
+
 </LinearLayout>
 

@@ -43,6 +43,11 @@
     <string name="header_activity_result">Shuffled media (Click to play)</string>
     <string name="folder_select_help_text">Enter folder by clicking - Select with long press</string>
 
+    <!-- Main Activity -->
+    <string name="selected_source_label">[Media Server not set...]</string>
+    <string name="selected_source_path_label">[Source path not set...]</string>
+    <string name="selected_target_path_label">[Target path not set...]</string>
+
     <!-- About Activity -->
     <string name="about_activity_header" translatable="false">Media Shuffle</string>
     <string name="about_activity_body">

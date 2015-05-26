@@ -40,4 +40,8 @@ Hyviä käyttöhetkiä!</string>
     <string name="title_setting_detail">Tarkat asetukset</string>
     <string name="title_setting_list">Asetukset</string>
     <string name="title_shuffling_header">Siirretään kokoelman tiedostoja. Ole hyvä ja odoita.</string>
+    <!-- Main Activity -->
+    <string name="selected_source_label">[Mediapalvelinta ei ole asetettu...]</string>
+    <string name="selected_source_path_label">[Lähdehakemistoa ei ole asetettu...]</string>
+    <string name="selected_target_path_label">[Kohdehakemistoa ei ole asetettu...]</string>
 </resources>
