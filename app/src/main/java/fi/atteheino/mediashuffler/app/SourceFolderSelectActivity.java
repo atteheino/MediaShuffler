@@ -69,9 +69,11 @@ public class SourceFolderSelectActivity extends Activity {
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             upnpService = (AndroidUpnpService) service;
-            upnpService.getRegistry().addListener(mListener);
-            if (upnpService.getRegistry().getRemoteDevices().size() == 0 && options.getDLNADeviceUDN() != null) {
-                upnpService.getControlPoint().search(new UDNHeader(new UDN(options.getDLNADeviceUDN())));
+            if (upnpService.getRegistry().getListeners().size() == 0) {
+                upnpService.getRegistry().addListener(mListener);
+                if (upnpService.getRegistry().getRemoteDevices().size() == 0 && options.getDLNADeviceUDN() != null) {
+                    upnpService.getControlPoint().search(new UDNHeader(new UDN(options.getDLNADeviceUDN())));
+                }
             }
             findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
         }

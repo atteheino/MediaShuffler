@@ -74,9 +74,11 @@ public class ShuffleActivity extends Activity {
             //Only browse the registry if we have not populated the filelists yet.
             if (mFileListGenerated != true) {
                 upnpService = (AndroidUpnpService) service;
-                upnpService.getRegistry().addListener(mListener);
-                if (upnpService.getRegistry().getRemoteDevices().size() == 0 && options.getDLNADeviceUDN() != null) {
-                    upnpService.getControlPoint().search(new UDNHeader(new UDN(options.getDLNADeviceUDN())));
+                if (upnpService.getRegistry().getListeners().size() == 0) {
+                    upnpService.getRegistry().addListener(mListener);
+                    if (upnpService.getRegistry().getRemoteDevices().size() == 0 && options.getDLNADeviceUDN() != null) {
+                        upnpService.getControlPoint().search(new UDNHeader(new UDN(options.getDLNADeviceUDN())));
+                    }
                 }
                 findCorrectDevice(upnpService.getRegistry().getRemoteDevices());
             }
