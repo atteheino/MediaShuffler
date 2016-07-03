@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fi.atteheino.mediashuffler.app;
+package fi.atteheino.mediashuffler.app.activity;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -30,12 +30,24 @@ import android.widget.ListView;
 
 import java.io.File;
 
+import fi.atteheino.mediashuffler.app.Options;
+import fi.atteheino.mediashuffler.app.R;
+import fi.atteheino.mediashuffler.app.SerializableMusicTrack;
+
 
 public class ResultActivity extends Activity {
 
     private ArrayAdapter<SerializableMusicTrack> arrayAdapter;
     private Options options;
     private NotificationManager mNotifyManager;
+    private ListView.OnItemClickListener resultListOnClickListener = new ListView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            String filename = options.getMusicTrackList().get(i).getFullFilename();
+            File file = new File(options.getTargetFolderName(), filename);
+            playMedia(Uri.fromFile(file));
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,15 +76,6 @@ public class ResultActivity extends Activity {
         intent.setDataAndType(file, "audio/*");
         startActivity(intent);
     }
-
-    private ListView.OnItemClickListener resultListOnClickListener = new ListView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            String filename = options.getMusicTrackList().get(i).getFullFilename();
-            File file = new File(options.getTargetFolderName(), filename);
-            playMedia(Uri.fromFile(file));
-        }
-    };
 
     public void onBackPressed() {
         Intent i = new Intent(this, MainActivity.class);

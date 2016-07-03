@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fi.atteheino.mediashuffler.app;
+package fi.atteheino.mediashuffler.app.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -21,6 +21,8 @@ import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import fi.atteheino.mediashuffler.app.R;
 
 
 public class AboutActivity extends Activity {

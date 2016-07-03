@@ -29,23 +29,23 @@ import java.util.List;
 import fi.atteheino.mediashuffler.app.Constants;
 import fi.atteheino.mediashuffler.app.Options;
 import fi.atteheino.mediashuffler.app.R;
-import fi.atteheino.mediashuffler.app.ResultActivity;
 import fi.atteheino.mediashuffler.app.SerializableMusicTrack;
-import fi.atteheino.mediashuffler.app.ShuffleActivity;
+import fi.atteheino.mediashuffler.app.activity.ResultActivity;
+import fi.atteheino.mediashuffler.app.activity.ShuffleActivity;
 import fi.atteheino.mediashuffler.app.utils.Downloader;
 
 /**
  * Created by Atte on 16.12.2014.
  */
 public class DownloadService extends IntentService {
-    private static final String TAG = "DownloadService";
     public static final String STATUS_RUNNING = "DownloadService.running";
     public static final String STATUS_STOPPED = "DownloadService.stopped";
     public static final String STATUS_IDLE = "DownloadService.idle";
+    private static final String TAG = "DownloadService";
+    private static final int NOTIFICATION_ID = 123;
     private String status;
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
-    private static final int NOTIFICATION_ID = 123;
 
     public DownloadService() {
         super("DownloadService");

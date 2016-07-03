@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fi.atteheino.mediashuffler.app;
+package fi.atteheino.mediashuffler.app.activity;
 
 import android.app.ListActivity;
 import android.content.ComponentName;
@@ -41,15 +41,22 @@ import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import fi.atteheino.mediashuffler.app.BrowserUpnpService;
+import fi.atteheino.mediashuffler.app.Options;
+import fi.atteheino.mediashuffler.app.R;
+
 
 public class BrowserActivity extends ListActivity {
 
+    static final Comparator<DeviceDisplay> DISPLAY_COMPARATOR =
+            new Comparator<DeviceDisplay>() {
+                public int compare(DeviceDisplay a, DeviceDisplay b) {
+                    return a.toString().compareTo(b.toString());
+                }
+            };
     private ArrayAdapter<DeviceDisplay> listAdapter;
-
     private BrowseRegistryListener registryListener = new BrowseRegistryListener();
-
     private AndroidUpnpService upnpService;
-
     private ServiceConnection serviceConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -72,7 +79,6 @@ public class BrowserActivity extends ListActivity {
             upnpService = null;
         }
     };
-
     private Options options;
 
     @Override
@@ -173,6 +179,17 @@ public class BrowserActivity extends ListActivity {
         upnpService.getControlPoint().search();
     }
 
+    protected void showToast(final String msg, final boolean longLength) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(
+                        BrowserActivity.this,
+                        msg,
+                        longLength ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
 
     protected class BrowseRegistryListener extends DefaultRegistryListener {
 
@@ -244,18 +261,6 @@ public class BrowserActivity extends ListActivity {
         }
     }
 
-    protected void showToast(final String msg, final boolean longLength) {
-        runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(
-                        BrowserActivity.this,
-                        msg,
-                        longLength ? Toast.LENGTH_LONG : Toast.LENGTH_SHORT
-                ).show();
-            }
-        });
-    }
-
     protected class DeviceDisplay {
 
         Device device;
@@ -291,11 +296,4 @@ public class BrowserActivity extends ListActivity {
             return device.isFullyHydrated() ? name : name + " *";
         }
     }
-
-    static final Comparator<DeviceDisplay> DISPLAY_COMPARATOR =
-            new Comparator<DeviceDisplay>() {
-                public int compare(DeviceDisplay a, DeviceDisplay b) {
-                    return a.toString().compareTo(b.toString());
-                }
-            };
 }

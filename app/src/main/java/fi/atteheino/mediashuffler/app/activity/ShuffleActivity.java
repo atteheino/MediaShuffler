@@ -13,17 +13,21 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fi.atteheino.mediashuffler.app;
+package fi.atteheino.mediashuffler.app.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +35,7 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.apache.commons.io.FileUtils;
 import org.teleal.cling.android.AndroidUpnpService;
 import org.teleal.cling.model.message.header.UDNHeader;
 import org.teleal.cling.model.meta.RemoteDevice;
@@ -40,6 +45,8 @@ import org.teleal.cling.registry.DefaultRegistryListener;
 import org.teleal.cling.registry.Registry;
 import org.teleal.cling.support.model.item.MusicTrack;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,6 +55,12 @@ import java.util.Observer;
 import java.util.Random;
 import java.util.Vector;
 
+import fi.atteheino.mediashuffler.app.BrowserUpnpService;
+import fi.atteheino.mediashuffler.app.Constants;
+import fi.atteheino.mediashuffler.app.DLNADirectoryBrowser;
+import fi.atteheino.mediashuffler.app.Options;
+import fi.atteheino.mediashuffler.app.R;
+import fi.atteheino.mediashuffler.app.SerializableMusicTrack;
 import fi.atteheino.mediashuffler.app.service.DownloadService;
 
 
@@ -55,19 +68,68 @@ public class ShuffleActivity extends Activity {
 
     static final String SERVICE_STATUS = "serviceStatus";
     static final String FILELIST_STATUS = "filelistStatus";
-
+    static final String PREPARE_STATUS = "prepareStatus";
+    private static final String TAG = "ShuffleActivity";
     AndroidUpnpService upnpService;
     private BasicRegistryListener mListener = new BasicRegistryListener();
-
     private Options options;
     private ProgressBar mProgressBar;
     private Vector<MusicTrack> musicTracks = new Vector<MusicTrack>();
-    private static final String TAG = "ShuffleActivity";
     private boolean mServiceIsRunning;
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    Log.d(TAG, "Dialog answer YES");
+                    removeOldCollectionFromDisk();
+                    transferFiles();
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    Log.d(TAG, "Dialog answer NO");
+                    transferFiles();
+                    break;
+            }
+        }
+    };
     private boolean mFileListGenerated;
+    private boolean mPrepareFileTransferDone;
     private DownloadStateReceiver mDownloadStateReceiver;
+    private Observer myCallbackObserver = new Observer() {
+        int countOfBrowsers = 0;
 
+        @Override
+        public void update(Observable observable, Object o) {
+            synchronized (this) {
+                // If there is no parameter passed, then the browse method has been called. In this case
+                // we shall add counter value.
+                // In other case, we will decrease counter value and add values to map
+                if (o == null) {
+                    countOfBrowsers++;
+                } else {
+                    List<MusicTrack> tempUris = (List<MusicTrack>) o;
+                    if (tempUris != null && tempUris.size() != 0) {
+                        musicTracks.addAll(tempUris);
+                    }
+                    countOfBrowsers--;
+                }
+                // Now we are waiting for the situation where countOfBrowsers is "0".
+                // When this occurs, we know that all URI's have been gathered and we can continue with the processing.
+                if (countOfBrowsers == 0) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Set the boolean so that we do not populate the filelist ever again.
+                            mFileListGenerated = true;
+                            prepareTransferFiles();
+                        }
+                    });
 
+                }
+            }
+        }
+    };
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.d(TAG, "onServiceConnected called from thread " + Thread.currentThread().getId());
@@ -107,42 +169,6 @@ public class ShuffleActivity extends Activity {
         }
     }
 
-
-    private Observer myCallbackObserver = new Observer() {
-        int countOfBrowsers = 0;
-
-        @Override
-        public void update(Observable observable, Object o) {
-            synchronized (this) {
-                // If there is no parameter passed, then the browse method has been called. In this case
-                // we shall add counter value.
-                // In other case, we will decrease counter value and add values to map
-                if (o == null) {
-                    countOfBrowsers++;
-                } else {
-                    List<MusicTrack> tempUris = (List<MusicTrack>) o;
-                    if (tempUris != null && tempUris.size() != 0) {
-                        musicTracks.addAll(tempUris);
-                    }
-                    countOfBrowsers--;
-                }
-                // Now we are waiting for the situation where countOfBrowsers is "0".
-                // When this occurs, we know that all URI's have been gathered and we can continue with the processing.
-                if (countOfBrowsers == 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Set the boolean so that we do not populate the filelist ever again.
-                            mFileListGenerated = true;
-                            transferFiles();
-                        }
-                    });
-
-                }
-            }
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,6 +178,9 @@ public class ShuffleActivity extends Activity {
         if (savedInstanceState != null) {
             mFileListGenerated = savedInstanceState.getBoolean(FILELIST_STATUS);
             mServiceIsRunning = savedInstanceState.getBoolean(SERVICE_STATUS);
+            mPrepareFileTransferDone = savedInstanceState.getBoolean(PREPARE_STATUS);
+        } else {
+            mPrepareFileTransferDone = false;
         }
 
         // Get the options needed
@@ -186,6 +215,7 @@ public class ShuffleActivity extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(SERVICE_STATUS, mServiceIsRunning);
         outState.putBoolean(FILELIST_STATUS, mFileListGenerated);
+        outState.putBoolean(PREPARE_STATUS, mPrepareFileTransferDone);
         super.onSaveInstanceState(outState);
     }
 
@@ -238,8 +268,28 @@ public class ShuffleActivity extends Activity {
         }
     }
 
-    public void transferFiles() {
+    public void prepareTransferFiles(){
+       Log.d(TAG, "prepareTransferFiles is called. mPrepareFileTransferDone: " + mPrepareFileTransferDone);
+        if(!mPrepareFileTransferDone) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            boolean deleteOld = sp.getBoolean("pref_delete_old_files", false);
+            Log.i(TAG, "DeleteOld value: " + deleteOld);
+            ((TextView) findViewById(R.id.statusText)).setText(R.string.shuffle_status_removing_files);
+            if (deleteOld) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(getString(R.string.shuffle_confirm_delete))
+                        .setPositiveButton(getString(R.string.yes), dialogClickListener)
+                        .setNegativeButton(getString(R.string.no), dialogClickListener).show();
+            }
+            mPrepareFileTransferDone = true;
+        } else {
+            transferFiles();
+        }
+    }
+
+    private void transferFiles() {
         Log.d(TAG, "transferFiles called from thread " + Thread.currentThread().getId());
+
         //Let's stop the progressbar and start feeding it correct values.
         if (mServiceIsRunning == false) {
             mProgressBar.setIndeterminate(false);
@@ -256,7 +306,6 @@ public class ShuffleActivity extends Activity {
         }
 
         //TODO: Should I backup the previous collection?
-        //TODO: Should the old files be removed or only add new files? (Add this as feature to be implemented in the future)
     }
 
     private List<SerializableMusicTrack> generateRandomList() {
@@ -306,6 +355,19 @@ public class ShuffleActivity extends Activity {
             serializableRandomMusicTrackList.add(serializableMusicTrack);
         }
         return serializableRandomMusicTrackList;
+    }
+
+    private boolean removeOldCollectionFromDisk() {
+        try {
+            File folderToClean = new File(options.getTargetFolderName());
+            Log.d(TAG, "About to clean folder: " + folderToClean.getAbsolutePath());
+            Log.d(TAG, "Does the folder to clean exists: " + folderToClean.exists());
+            FileUtils.cleanDirectory(new File(options.getTargetFolderName()));
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+            return false;
+        }
+        return true;
     }
 
     @Override

@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fi.atteheino.mediashuffler.app;
+package fi.atteheino.mediashuffler.app.activity;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -51,21 +51,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import fi.atteheino.mediashuffler.app.BrowserUpnpService;
+import fi.atteheino.mediashuffler.app.Constants;
+import fi.atteheino.mediashuffler.app.Folder;
+import fi.atteheino.mediashuffler.app.Options;
+import fi.atteheino.mediashuffler.app.R;
 import fi.atteheino.mediashuffler.app.adapter.FolderSelectArrayAdapter;
 
 
 public class SourceFolderSelectActivity extends Activity {
 
 
+    private static final String IS_FIRST_LAUNCH = "is_first_SourceFolderSelectActivity";
     AndroidUpnpService upnpService;
     FolderSelectArrayAdapter adapter;
     private ListFoldersRegistryListener mListener = new ListFoldersRegistryListener();
-
     private String level = "0";
     private Options options;
-    private static final String IS_FIRST_LAUNCH = "is_first_SourceFolderSelectActivity";
-
-
     ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             upnpService = (AndroidUpnpService) service;
@@ -82,6 +84,28 @@ public class SourceFolderSelectActivity extends Activity {
             upnpService.getRegistry().removeAllRemoteDevices();
             upnpService = null;
 
+        }
+    };
+    // Create a message handling object as an anonymous class.
+    private AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView parent, View v, int position, long id) {
+            Intent sourceFolderSelectActivity = new Intent(getApplicationContext(), SourceFolderSelectActivity.class);
+            sourceFolderSelectActivity.putExtra("Options", options);
+            TextView idView = (TextView) v.findViewById(R.id.folderIdTextView);
+            sourceFolderSelectActivity.putExtra("selected_level", idView.getText().toString());
+            startActivity(sourceFolderSelectActivity);
+        }
+    };
+    private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
+            Folder folder = (Folder) adapterView.getItemAtPosition(position);
+            options.setSourceFolderID(folder.getId());
+            options.setSourceFolderName(folder.getName());
+            mainActivityIntent.putExtra("Options", options);
+            startActivity(mainActivityIntent);
+            return true;
         }
     };
 
@@ -123,7 +147,6 @@ public class SourceFolderSelectActivity extends Activity {
         }
     }
 
-
     private void updateAdapter(final List<Folder> folders){
         runOnUiThread(new Runnable() {
             @Override
@@ -135,7 +158,6 @@ public class SourceFolderSelectActivity extends Activity {
         });
 
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,30 +202,6 @@ public class SourceFolderSelectActivity extends Activity {
         Toast tipToast = Toast.makeText(getApplicationContext(), R.string.folder_select_help_text, Toast.LENGTH_LONG);
         tipToast.show();
     }
-
-    // Create a message handling object as an anonymous class.
-    private AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView parent, View v, int position, long id) {
-            Intent sourceFolderSelectActivity = new Intent(getApplicationContext(), SourceFolderSelectActivity.class);
-            sourceFolderSelectActivity.putExtra("Options", options);
-            TextView idView = (TextView) v.findViewById(R.id.folderIdTextView);
-            sourceFolderSelectActivity.putExtra("selected_level", idView.getText().toString());
-            startActivity(sourceFolderSelectActivity);
-        }
-    };
-
-    private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
-        @Override
-        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-            Folder folder = (Folder) adapterView.getItemAtPosition(position);
-            options.setSourceFolderID(folder.getId());
-            options.setSourceFolderName(folder.getName());
-            mainActivityIntent.putExtra("Options", options);
-            startActivity(mainActivityIntent);
-            return true;
-        }
-    };
 
 
    /* private View.OnClickListener sourceFolderTextViewListener = new View.OnClickListener() {

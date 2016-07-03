@@ -38,15 +38,19 @@
     <string name="set_as_root">Set as root</string>
     <string name="title_shuffling_header">Shuffling the files. Please wait.</string>
     <string name="cancel_button">Cancel</string>
-    <string name="shuffle_status_preparing">Creating list of files...</string>
-    <string name="shuffle_status_moving_files">Transferring files...</string>
+    <string name="shuffle_status_preparing">Creating list of files ...</string>
+    <string name="shuffle_status_moving_files">Transferring files ...</string>
+    <string name="shuffle_status_removing_files">Deleting existing files ...</string>
+    <string name="shuffle_confirm_delete">Delete existing collection? (You had ticked it active in settings)</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <string name="header_activity_result">Shuffled media (Click to play)</string>
     <string name="folder_select_help_text">Enter folder by clicking - Select with long press</string>
 
     <!-- Main Activity -->
-    <string name="selected_source_label">[Media Server not set...]</string>
-    <string name="selected_source_path_label">[Source path not set...]</string>
-    <string name="selected_target_path_label">[Target path not set...]</string>
+    <string name="selected_source_label">[Media Server not set ...]</string>
+    <string name="selected_source_path_label">[Source path not set ...]</string>
+    <string name="selected_target_path_label">[Target path not set ...]</string>
 
     <!-- About Activity -->
     <string name="about_activity_header" translatable="false">Media Shuffle</string>

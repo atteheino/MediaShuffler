@@ -27,8 +27,8 @@ Hyviä käyttöhetkiä!</string>
     <string name="searching_lan">Etsitään UPnP laitteita lähiverkosta</string>
     <string name="service_download_in_progress">Lataus käynnissä</string>
     <string name="set_as_root">Aseta juurikansioksi</string>
-    <string name="shuffle_status_moving_files">Siirretään tiedostoja...</string>
-    <string name="shuffle_status_preparing">Muodostetaan listaa siirrettävistä tiedostoista...</string>
+    <string name="shuffle_status_moving_files">Siirretään tiedostoja ...</string>
+    <string name="shuffle_status_preparing">Muodostetaan listaa siirrettävistä tiedostoista ...</string>
     <string name="size_of_collection_activity_main">Valitse kokoelman maksimikoko (GB):</string>
     <string name="source_activity_main">Valitse DLNA palvelin</string>
     <string name="source_path_activity_main">Valitse lähdehakemisto</string>
@@ -41,7 +41,15 @@ Hyviä käyttöhetkiä!</string>
     <string name="title_setting_list">Asetukset</string>
     <string name="title_shuffling_header">Siirretään kokoelman tiedostoja. Ole hyvä ja odota.</string>
     <!-- Main Activity -->
-    <string name="selected_source_label">[Mediapalvelinta ei ole asetettu...]</string>
-    <string name="selected_source_path_label">[Lähdehakemistoa ei ole asetettu...]</string>
-    <string name="selected_target_path_label">[Kohdehakemistoa ei ole asetettu...]</string>
+    <string name="selected_source_label">[Mediapalvelinta ei ole asetettu ...]</string>
+    <string name="selected_source_path_label">[Lähdehakemistoa ei ole asetettu ...]</string>
+    <string name="selected_target_path_label">[Kohdehakemistoa ei ole asetettu ...]</string>
+    <string name="pref_delete_old_files">Poista olemassa oleva kokoelma</string>
+    <string name="pref_delete_old_files_summary_default">Säilytä tiedostot</string>
+    <string name="pref_header_general">Yleiset</string>
+    <string name="shuffle_status_removing_files">Poistetaan olemassa olevaa kokoelmaa ...</string>
+    <string name="yes">Kyllä</string>
+    <string name="title_activity_settings">Asetukset</string>
+    <string name="shuffle_confirm_delete">Poistetaanko olemassa oleva kokoelma? (Olit valinnut tämän asetuksista)</string>
+    <string name="no">Ei</string>
 </resources>

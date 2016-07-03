@@ -17,26 +17,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="fi.atteheino.mediashuffler.app.TargetFolderSelectActivity">
+    tools:context="fi.atteheino.mediashuffler.app.activity.TargetFolderSelectActivity">
 
     <TextView
+        android:id="@+id/pathView"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="path something that looks like this."
         android:background="@color/hint_foreground_material_dark"
-        android:id="@+id/pathView"
+        android:text="path something that looks like this."
         android:textAlignment="center"
         android:textStyle="bold" />
 
     <ListView
+        android:id="@+id/targetFolderListView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/targetFolderListView"
-        android:listSelector="@drawable/list_selector"
-        android:layout_below="@id/pathView" />
+        android:layout_below="@id/pathView"
+        android:listSelector="@drawable/list_selector" />
 
 </RelativeLayout>

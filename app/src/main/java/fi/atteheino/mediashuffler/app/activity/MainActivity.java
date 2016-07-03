@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fi.atteheino.mediashuffler.app;
+package fi.atteheino.mediashuffler.app.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -26,11 +26,50 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import fi.atteheino.mediashuffler.app.Constants;
+import fi.atteheino.mediashuffler.app.Options;
+import fi.atteheino.mediashuffler.app.R;
+
 
 public class MainActivity extends Activity {
     private int selectedSizeOfCollection = 0;
     private Options options;
+    private View.OnClickListener startTransferButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent startTransferIntent = new Intent(getApplicationContext(), ShuffleActivity.class);
+            startTransferIntent.putExtra("Options", options);
+            startActivity(startTransferIntent);
+        }
+    };
+    private View.OnClickListener sourceButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent browserActivityIntent = new Intent(getApplicationContext(), BrowserActivity.class);
+            browserActivityIntent.putExtra("Options", options);
+            startActivity(browserActivityIntent);
+        }
+    };
+    private View.OnClickListener sourceFolderButtonListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Intent sourceFolderSelectActivity = new Intent(getApplicationContext(), SourceFolderSelectActivity.class);
+            sourceFolderSelectActivity.putExtra("Options", options);
+            startActivity(sourceFolderSelectActivity);
+        }
+    };
+    private View.OnClickListener targetFolderButtonListener = new View.OnClickListener() {
 
+        @Override
+        public void onClick(View view) {
+
+            Intent targetFolderSelectActivity = new Intent(getApplicationContext(), TargetFolderSelectActivity.class);
+            targetFolderSelectActivity.putExtra("Options", options);
+            startActivity(targetFolderSelectActivity);
+
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +80,13 @@ public class MainActivity extends Activity {
 
         final TextView sizeOfCollectionText = (TextView) findViewById(R.id.sizeOfCollectionText);
         SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
-        seekbar.setMax(30);
+        seekbar.setMax(50);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 final float gigs = i / (float) 10;
                 sizeOfCollectionText.setText(gigs + "GB");
-                selectedSizeOfCollection = i * 1000;
+                selectedSizeOfCollection = Float.valueOf(gigs * 1000).intValue();
                 options.setTargetSizeMegaBytes(selectedSizeOfCollection);
             }
 
@@ -76,47 +115,6 @@ public class MainActivity extends Activity {
         startTransferButton.setOnClickListener(startTransferButtonListener);
 
     }
-
-    private View.OnClickListener startTransferButtonListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Intent startTransferIntent = new Intent(getApplicationContext(), ShuffleActivity.class);
-            startTransferIntent.putExtra("Options", options);
-            startActivity(startTransferIntent);
-        }
-    };
-
-    private View.OnClickListener sourceButtonListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Intent browserActivityIntent = new Intent(getApplicationContext(), BrowserActivity.class);
-            browserActivityIntent.putExtra("Options", options);
-            startActivity(browserActivityIntent);
-        }
-    };
-
-    private View.OnClickListener sourceFolderButtonListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Intent sourceFolderSelectActivity = new Intent(getApplicationContext(), SourceFolderSelectActivity.class);
-            sourceFolderSelectActivity.putExtra("Options", options);
-            startActivity(sourceFolderSelectActivity);
-        }
-    };
-
-    private View.OnClickListener targetFolderButtonListener = new View.OnClickListener() {
-
-        @Override
-        public void onClick(View view) {
-
-            Intent targetFolderSelectActivity = new Intent(getApplicationContext(), TargetFolderSelectActivity.class);
-            targetFolderSelectActivity.putExtra("Options", options);
-            startActivity(targetFolderSelectActivity);
-
-
-        }
-    };
-
 
     @Override
     protected void onResume() {
@@ -223,6 +221,11 @@ public class MainActivity extends Activity {
         if (id == R.id.action_about) {
             Intent aboutIntent = new Intent(getApplicationContext(), AboutActivity.class);
             startActivity(aboutIntent);
+            return true;
+        }
+        if (id == R.id.action_settings ) {
+            Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
         return super.onOptionsItemSelected(item);

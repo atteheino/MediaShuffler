@@ -1,0 +1,12 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- General settings -->
+    <string name="pref_header_general">General</string>
+    <string name="pref_delete_old_files">Remove old music collection</string>
+    <string name="pref_delete_old_files_summary_default">Keep files</string>
+
+
+</resources>

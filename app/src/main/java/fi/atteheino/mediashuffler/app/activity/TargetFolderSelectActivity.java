@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fi.atteheino.mediashuffler.app;
+package fi.atteheino.mediashuffler.app.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -35,16 +35,40 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import fi.atteheino.mediashuffler.app.Constants;
+import fi.atteheino.mediashuffler.app.Options;
+import fi.atteheino.mediashuffler.app.R;
+
 
 public class TargetFolderSelectActivity extends Activity {
 
+    private static final String IS_FIRST_LAUNCH = "is_first_TargetFolderSelectActivity";
+    private final String sdRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
     private Options options;
     private String mCurrentRootFolder = "";
     private List<String> mFolders;
     private ArrayAdapter<String> mAdapter;
-    private final String sdRoot = Environment.getExternalStorageDirectory().getAbsolutePath();
+    // Create a message handling object as an anonymous class.
+    private AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
+        public void onItemClick(AdapterView parent, View v, int position, long id) {
 
-    private static final String IS_FIRST_LAUNCH = "is_first_TargetFolderSelectActivity";
+            TextView idView = (TextView) v.findViewById(android.R.id.text1);
+            setmCurrentRootFolder(getmCurrentRootFolder() + "/" + idView.getText());
+            updateDirectories();
+
+        }
+    };
+    private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
+            final TextView textView = (TextView) view.findViewById(android.R.id.text1);
+            options.setTargetFolderName(getmCurrentRootFolder() + "/" + textView.getText());
+            mainActivityIntent.putExtra("Options", options);
+            startActivity(mainActivityIntent);
+            return true;
+        }
+    };
 
     //Return root directory or currently selected directory
     public String getmCurrentRootFolder() {
@@ -54,7 +78,6 @@ public class TargetFolderSelectActivity extends Activity {
     public void setmCurrentRootFolder(String mCurrentRootFolder) {
         this.mCurrentRootFolder = mCurrentRootFolder;
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,18 +111,6 @@ public class TargetFolderSelectActivity extends Activity {
         tipToast.show();
     }
 
-
-    // Create a message handling object as an anonymous class.
-    private AdapterView.OnItemClickListener mMessageClickedHandler = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView parent, View v, int position, long id) {
-
-            TextView idView = (TextView) v.findViewById(android.R.id.text1);
-            setmCurrentRootFolder(getmCurrentRootFolder() + "/" + idView.getText());
-            updateDirectories();
-
-        }
-    };
-
     private void updateDirectories() {
         mFolders.clear();
         mFolders.addAll(getFolders(getmCurrentRootFolder()));
@@ -108,19 +119,6 @@ public class TargetFolderSelectActivity extends Activity {
         TextView pathView = (TextView) findViewById(R.id.pathView);
         pathView.setText(getmCurrentRootFolder());
     }
-
-    private AdapterView.OnItemLongClickListener itemLongClickListener = new AdapterView.OnItemLongClickListener() {
-        @Override
-        public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-            Intent mainActivityIntent = new Intent(getApplicationContext(), MainActivity.class);
-            final TextView textView = (TextView) view.findViewById(android.R.id.text1);
-            options.setTargetFolderName(getmCurrentRootFolder() + "/" + textView.getText());
-            mainActivityIntent.putExtra("Options", options);
-            startActivity(mainActivityIntent);
-            return true;
-        }
-    };
-
 
     private List<String> getFolders(String rootFolder) {
         List<String> dirs = new ArrayList<String>();
